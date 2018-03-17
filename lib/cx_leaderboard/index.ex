@@ -56,12 +56,13 @@ defmodule CxLeaderboard.EtsStore.Index do
   defp flush(itab, buf, chunk_pos, freq, cnt) do
     rank = chunk_pos + 1
     lower_scores_count = cnt - chunk_pos - freq
-    percentile = ((lower_scores_count + 0.5 * freq) / cnt * 100)
+    percentile = (lower_scores_count + 0.5 * freq) / cnt * 100
 
     buf
     |> Stream.map(fn
       {key = {_, _, id}, i} ->
         {id, key, {i, rank, percentile, lower_scores_count, freq}}
+
       {key = {_, id}, i} ->
         {id, key, {i, rank, percentile, lower_scores_count, freq}}
     end)

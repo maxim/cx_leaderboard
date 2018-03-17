@@ -29,9 +29,9 @@ defmodule CxLeaderboardTest do
       |> Enum.take(2)
 
     assert [
-      {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}},
-      {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}}
-    ] == top
+             {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}},
+             {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}}
+           ] == top
   end
 
   test "supports payloads in each entry", %{board: board} do
@@ -45,9 +45,9 @@ defmodule CxLeaderboardTest do
       |> Enum.take(2)
 
     assert [
-      {{-30, :id2}, %{bar: "bar"}, {0, 1, 75.0, 1, 1}},
-      {{-20, :id1}, %{foo: "foo"}, {1, 2, 25.0, 0, 1}}
-    ] == top
+             {{-30, :id2}, %{bar: "bar"}, {0, 1, 75.0, 1, 1}},
+             {{-20, :id1}, %{foo: "foo"}, {1, 2, 25.0, 0, 1}}
+           ] == top
   end
 
   test "supports tiebreaks in each entry", %{board: board} do
@@ -62,11 +62,11 @@ defmodule CxLeaderboardTest do
       |> CxLeaderboard.top()
       |> Enum.take(4)
 
-     assert [
-       {{-30, 3, :id3}, :id3, {0, 1, 75.0, 2, 2}},
-       {{-30, 4, :id4}, :id4, {1, 1, 75.0, 2, 2}},
-       {{-20, 1, :id2}, :id2, {2, 3, 25.0, 0, 2}},
-       {{-20, 2, :id1}, :id1, {3, 3, 25.0, 0, 2}}
-     ] == top
+    assert [
+             {{-30, 3, :id3}, :id3, {0, 1, 75.0, 2, 2}},
+             {{-30, 4, :id4}, :id4, {1, 1, 75.0, 2, 2}},
+             {{-20, 1, :id2}, :id2, {2, 3, 25.0, 0, 2}},
+             {{-20, 2, :id1}, :id1, {3, 3, 25.0, 0, 2}}
+           ] == top
   end
 end
