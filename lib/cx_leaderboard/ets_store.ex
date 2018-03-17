@@ -59,26 +59,15 @@ defmodule CxLeaderboard.EtsStore do
     {:ok, {count, t2 - t1}}
   end
 
-  # TODO: Refactor this
   def get(name, id) do
-    table_name = get_meta(name, :entries_table_name)
-    index_name = get_meta(name, :index_table_name)
+    with table when not is_nil(table)    <- get_meta(name, :entries_table_name),
+         index when not is_nil(index)    <- get_meta(name, :index_table_name),
+         {:ok, index_term = {_, key, _}} <- lookup(index, id),
+         {:ok, table_term = {_, _}}      <- lookup(table, key) do
 
-    if table_name && index_name do
-      case lookup(index_name, id) do
-        {:ok, index_obj} when is_tuple(index_obj) ->
-          case lookup(table_name, elem(index_obj, 1)) do
-            {:ok, table_obj} when is_tuple(table_obj) ->
-              build_entry(table_obj, index_obj)
-            _ ->
-              nil
-          end
-
-        _ ->
-          nil
-      end
+      build_entry(table_term, index_term)
     else
-      nil
+      _ -> nil
     end
   end
 
