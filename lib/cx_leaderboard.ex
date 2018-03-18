@@ -4,7 +4,7 @@ defmodule CxLeaderboard do
 
   TODO:
     - [DONE] Rewrite Index.build
-    - Allow add/remove entries (rebuild only index) but still leave
+    - [DONE] Allow add/remove entries (rebuild only index) but still leave
       populate() function for initial setup
     - Decide how to handle invalid entries
     - [DONE] Move Server logic under EtsStore
@@ -52,8 +52,15 @@ defmodule CxLeaderboard do
     Map.put(lb, :reply, reply)
   end
 
-  # def add(name, score, entry) do
-  # end
+  def add(lb = %Leaderboard{id: id, store: store}, entry) do
+    reply = store.add(id, entry)
+    Map.put(lb, :reply, reply)
+  end
+
+  def remove(lb = %Leaderboard{id: id, store: store}, entry_id) do
+    reply = store.remove(id, entry_id)
+    Map.put(lb, :reply, reply)
+  end
 
   ## Reader functions
 

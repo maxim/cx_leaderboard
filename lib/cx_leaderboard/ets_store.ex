@@ -20,6 +20,14 @@ defmodule CxLeaderboard.EtsStore do
     GenServer.abcast(name, {:populate, data})
   end
 
+  def add(name, entry) do
+    GenServer.multi_call(name, {:add, entry})
+  end
+
+  def remove(name, id) do
+    GenServer.multi_call(name, {:remove, id})
+  end
+
   ## Readers
 
   def get(name, id) do

@@ -24,38 +24,51 @@ defmodule CxLeaderboard.EtsStore.Ets do
 
   def init(name) do
     create_meta_table(name)
-    set_meta(name, {:status, :started})
+    set_meta(name, [{:status, :started}, {:count, 0}])
     {:ok, name}
   end
 
+  def add(name, entry) do
+    modify_with_reindex(name, +1, fn table ->
+      :ets.insert(table, format_entry(entry))
+    end)
+  end
+
+  def remove(name, id) do
+    case get(name, id) do
+      {key, _, _} ->
+        modify_with_reindex(name, -1, fn table ->
+          :ets.delete(table, key)
+        end)
+
+      _ ->
+        {:error, :key_not_found}
+    end
+  end
+
   def populate(name, data) do
-    t1 = :os.system_time(:millisecond)
-    set_meta(name, {:status, :updating})
+    t1 = get_timestamp()
+    set_meta(name, {:status, :populating})
 
-    old_table_name = get_meta(name, :entries_table_name)
-    old_index_name = get_meta(name, :index_table_name)
+    old_table = get_meta(name, :entries_table_name)
+    old_index = get_meta(name, :index_table_name)
 
-    new_timestamp = :os.system_time(:millisecond)
-    entries_table_name = create_entries_table(name, new_timestamp)
-    index_table_name = create_index_table(name, new_timestamp)
+    suffix = get_rand_suffix()
 
-    data_stream = build_data_stream(data)
-    count = Enum.count(data_stream, &:ets.insert(entries_table_name, &1))
-
-    Index.build(entries_table_name, index_table_name, count)
+    {new_table, count} = insert_entries(name, data, suffix)
+    new_index = build_index(name, new_table, count, suffix)
 
     set_meta(name, [
-      {:entries_table_name, entries_table_name},
-      {:index_table_name, index_table_name},
+      {:entries_table_name, new_table},
+      {:index_table_name, new_index},
       {:status, :normal},
       {:count, count}
     ])
 
-    if old_table_name, do: :ets.delete(old_table_name)
-    if old_index_name, do: :ets.delete(old_index_name)
+    if old_table, do: :ets.delete(old_table)
+    if old_index, do: :ets.delete(old_index)
 
-    t2 = :os.system_time(:millisecond)
-
+    t2 = get_timestamp()
     {:ok, {count, t2 - t1}}
   end
 
@@ -90,6 +103,43 @@ defmodule CxLeaderboard.EtsStore.Ets do
 
   ## Private
 
+  defp modify_with_reindex(name, count_change, modification) do
+    t1 = get_timestamp()
+    set_meta(name, {:status, :reindexing})
+
+    table = get_meta(name, :entries_table_name)
+    old_index = get_meta(name, :index_table_name)
+    new_count = get_meta(name, :count) + count_change
+
+    modification.(table)
+
+    new_index = build_index(name, table, new_count)
+
+    set_meta(name, [
+      {:index_table_name, new_index},
+      {:status, :normal},
+      {:count, new_count}
+    ])
+
+    if old_index, do: :ets.delete(old_index)
+
+    t2 = get_timestamp()
+    {:ok, {new_count, t2 - t1}}
+  end
+
+  defp insert_entries(name, data, suffix) do
+    table = create_entries_table(name, suffix)
+    data_stream = build_data_stream(data)
+    count = Enum.count(data_stream, &:ets.insert(table, &1))
+    {table, count}
+  end
+
+  defp build_index(name, table, count, suffix \\ get_rand_suffix()) do
+    index = create_index_table(name, suffix)
+    Index.build(table, index, count)
+    index
+  end
+
   defp build_entry({key, payload}, {_, _, stats}) do
     {key, payload, stats}
   end
@@ -103,13 +153,13 @@ defmodule CxLeaderboard.EtsStore.Ets do
 
   defp build_data_stream(data) do
     data
-    |> Stream.map(fn
-      entry = {{_, _, _}, _} -> entry
-      entry = {{_, _}, _} -> entry
-      entry = {_, _, id} -> {entry, id}
-      entry = {_, id} -> {entry, id}
-    end)
+    |> Stream.map(&format_entry/1)
   end
+
+  defp format_entry(entry = {{_, _, _}, _}), do: entry
+  defp format_entry(entry = {{_, _}, _}), do: entry
+  defp format_entry(entry = {_, _, id}), do: {entry, id}
+  defp format_entry(entry = {_, id}), do: {entry, id}
 
   defp set_meta(name, record) do
     name
@@ -159,5 +209,16 @@ defmodule CxLeaderboard.EtsStore.Ets do
       error ->
         error
     end
+  end
+
+  defp get_timestamp do
+    :os.system_time(:millisecond)
+  end
+
+  defp get_rand_suffix(bytes \\ 10) do
+    1..bytes
+    |> Enum.map(fn _ -> :rand.uniform(255) end)
+    |> :binary.list_to_bin()
+    |> Base.url_encode64(padding: false)
   end
 end
