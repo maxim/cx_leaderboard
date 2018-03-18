@@ -48,9 +48,9 @@ defmodule CxLeaderboard.EtsStore.Index do
   end
 
   defp score_changed?({score, _, _}, [{{score, _, _}, _} | _]), do: false
-  defp score_changed?({score, _, _}, [{{score,    _}, _} | _]), do: false
-  defp score_changed?({score,    _}, [{{score, _, _}, _} | _]), do: false
-  defp score_changed?({score,    _}, [{{score,    _}, _} | _]), do: false
+  defp score_changed?({score, _, _}, [{{score, _}, _} | _]), do: false
+  defp score_changed?({score, _}, [{{score, _, _}, _} | _]), do: false
+  defp score_changed?({score, _}, [{{score, _}, _} | _]), do: false
   defp score_changed?(_, _), do: true
 
   defp flush(itab, buf, chunk_pos, freq, cnt) do

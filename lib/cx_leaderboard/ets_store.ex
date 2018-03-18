@@ -60,11 +60,10 @@ defmodule CxLeaderboard.EtsStore do
   end
 
   def get(name, id) do
-    with table when not is_nil(table)    <- get_meta(name, :entries_table_name),
-         index when not is_nil(index)    <- get_meta(name, :index_table_name),
+    with table when not is_nil(table) <- get_meta(name, :entries_table_name),
+         index when not is_nil(index) <- get_meta(name, :index_table_name),
          {:ok, index_term = {_, key, _}} <- lookup(index, id),
-         {:ok, table_term = {_, _}}      <- lookup(table, key) do
-
+         {:ok, table_term = {_, _}} <- lookup(table, key) do
       build_entry(table_term, index_term)
     else
       _ -> nil
@@ -106,9 +105,9 @@ defmodule CxLeaderboard.EtsStore do
     data
     |> Stream.map(fn
       entry = {{_, _, _}, _} -> entry
-      entry = {{_, _}, _}    -> entry
-      entry = {_, _, id}     -> {entry, id}
-      entry = {_, id}        -> {entry, id}
+      entry = {{_, _}, _} -> entry
+      entry = {_, _, id} -> {entry, id}
+      entry = {_, id} -> {entry, id}
     end)
   end
 
