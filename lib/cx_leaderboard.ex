@@ -14,7 +14,6 @@ defmodule CxLeaderboard do
     - More tests
   """
 
-  alias CxLeaderboard.EtsStore
   alias CxLeaderboard.Leaderboard
 
   @doc """
@@ -32,26 +31,25 @@ defmodule CxLeaderboard do
 
   ## Writer functions
 
-  # TODO:
-  # Specify storage here
-  def create(name) do
-    reply = EtsStore.create(name)
-    %Leaderboard{id: name, reply: reply}
+  def create(name, kwargs \\ []) do
+    store = Keyword.get(kwargs, :store, CxLeaderboard.EtsStore)
+    reply = store.create(name)
+    %Leaderboard{id: name, store: store, reply: reply}
   end
 
-  def destroy(leaderboard = %Leaderboard{id: id}) do
-    reply = EtsStore.destroy(id)
-    Map.put(leaderboard, :reply, reply)
+  def destroy(lb = %Leaderboard{id: id, store: store}) do
+    reply = store.destroy(id)
+    Map.put(lb, :reply, reply)
   end
 
-  def populate(leaderboard = %Leaderboard{id: id}, data) do
-    reply = EtsStore.populate(id, data)
-    Map.put(leaderboard, :reply, reply)
+  def populate(lb = %Leaderboard{id: id, store: store}, data) do
+    reply = store.populate(id, data)
+    Map.put(lb, :reply, reply)
   end
 
-  def populate(leaderboard = %Leaderboard{id: id}, data, async: true) do
-    reply = EtsStore.async_populate(id, data)
-    Map.put(leaderboard, :reply, reply)
+  def async_populate(lb = %Leaderboard{id: id, store: store}, data) do
+    reply = store.async_populate(id, data)
+    Map.put(lb, :reply, reply)
   end
 
   # def add(name, score, entry) do
@@ -59,11 +57,11 @@ defmodule CxLeaderboard do
 
   ## Reader functions
 
-  def top(%Leaderboard{id: id}) do
-    EtsStore.top(id)
+  def top(%Leaderboard{id: id, store: store}) do
+    store.top(id)
   end
 
-  def count(%Leaderboard{id: id}) do
-    EtsStore.count(id)
+  def count(%Leaderboard{id: id, store: store}) do
+    store.count(id)
   end
 end
