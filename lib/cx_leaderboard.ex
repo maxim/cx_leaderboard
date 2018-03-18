@@ -7,14 +7,13 @@ defmodule CxLeaderboard do
     - Allow add/remove entries (rebuild only index) but still leave
       populate() function for initial setup
     - Decide how to handle invalid entries
-    - Move Server logic under EtsStore
+    - [DONE] Move Server logic under EtsStore
     - Figure out how to reuse this library at Crossfield
     - Docs
     - Typespecs
     - More tests
   """
 
-  alias CxLeaderboard.Server
   alias CxLeaderboard.EtsStore
   alias CxLeaderboard.Leaderboard
 
@@ -36,22 +35,22 @@ defmodule CxLeaderboard do
   # TODO:
   # Specify storage here
   def create(name) do
-    reply = {:ok, _} = GenServer.start_link(Server, name, name: name)
-    {:ok, %Leaderboard{id: name, reply: reply}}
+    reply = EtsStore.create(name)
+    %Leaderboard{id: name, reply: reply}
   end
 
   def destroy(leaderboard = %Leaderboard{id: id}) do
-    reply = GenServer.stop(id)
+    reply = EtsStore.destroy(id)
     Map.put(leaderboard, :reply, reply)
   end
 
   def populate(leaderboard = %Leaderboard{id: id}, data) do
-    reply = GenServer.multi_call(id, {:populate, data})
+    reply = EtsStore.populate(id, data)
     Map.put(leaderboard, :reply, reply)
   end
 
   def populate(leaderboard = %Leaderboard{id: id}, data, async: true) do
-    reply = GenServer.abcast(id, {:populate, data})
+    reply = EtsStore.async_populate(id, data)
     Map.put(leaderboard, :reply, reply)
   end
 

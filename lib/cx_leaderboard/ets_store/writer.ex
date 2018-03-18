@@ -1,14 +1,14 @@
-defmodule CxLeaderboard.Server do
-  alias CxLeaderboard.EtsStore
+defmodule CxLeaderboard.EtsStore.Writer do
   use GenServer
+  alias CxLeaderboard.EtsStore.Ets
 
   def init(name) do
-    EtsStore.init(name)
+    Ets.init(name)
     {:ok, name}
   end
 
   def handle_call({:populate, data}, _from, name) do
-    {:ok, {count, time}} = EtsStore.populate(name, data)
+    {:ok, {count, time}} = Ets.populate(name, data)
     # secs = time / 1000
     # IO.puts("[CxLeaderboard] #{name} indexed #{count} entries in #{secs}s")
     {:reply, {count, time}, name}

@@ -3,7 +3,7 @@ defmodule CxLeaderboardTest do
   doctest CxLeaderboard
 
   setup do
-    {:ok, board} = CxLeaderboard.create(:test_board)
+    board = CxLeaderboard.create(:test_board)
     {:ok, board: board}
   end
 
