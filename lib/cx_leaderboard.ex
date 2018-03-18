@@ -16,6 +16,7 @@ defmodule CxLeaderboard do
 
   alias CxLeaderboard.Server
   alias CxLeaderboard.EtsStore
+  alias CxLeaderboard.Leaderboard
 
   @doc """
   Hello world.
@@ -32,23 +33,26 @@ defmodule CxLeaderboard do
 
   ## Writer functions
 
+  # TODO:
+  # Specify storage here
   def create(name) do
-    {:ok, _} = GenServer.start_link(Server, name, name: name)
-    {:ok, name}
+    reply = {:ok, _} = GenServer.start_link(Server, name, name: name)
+    {:ok, %Leaderboard{id: name, reply: reply}}
   end
 
-  def destroy(name) do
-    GenServer.stop(name)
+  def destroy(leaderboard = %Leaderboard{id: id}) do
+    reply = GenServer.stop(id)
+    Map.put(leaderboard, :reply, reply)
   end
 
-  # TODO: Rethink what is being returned here (name allows pipelines in tests)
-  def populate(name, data) do
-    GenServer.multi_call(name, {:populate, data})
-    name
+  def populate(leaderboard = %Leaderboard{id: id}, data) do
+    reply = GenServer.multi_call(id, {:populate, data})
+    Map.put(leaderboard, :reply, reply)
   end
 
-  def populate(name, data, async: true) do
-    GenServer.abcast(name, {:populate, data})
+  def populate(leaderboard = %Leaderboard{id: id}, data, async: true) do
+    reply = GenServer.abcast(id, {:populate, data})
+    Map.put(leaderboard, :reply, reply)
   end
 
   # def add(name, score, entry) do
@@ -56,11 +60,11 @@ defmodule CxLeaderboard do
 
   ## Reader functions
 
-  def top(name) do
-    EtsStore.top(name)
+  def top(%Leaderboard{id: id}) do
+    EtsStore.top(id)
   end
 
-  def count(name) do
-    EtsStore.count(name)
+  def count(%Leaderboard{id: id}) do
+    EtsStore.count(id)
   end
 end
