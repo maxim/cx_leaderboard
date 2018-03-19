@@ -24,7 +24,14 @@ defmodule CxLeaderboard.EtsStore.Ets do
 
   def init(name) do
     create_meta_table(name)
-    set_meta(name, [{:status, :started}, {:count, 0}])
+
+    set_meta(name, [
+      {:entries_table_name, create_entries_table(name)},
+      {:index_table_name, create_index_table(name)},
+      {:status, :started},
+      {:count, 0}
+    ])
+
     {:ok, name}
   end
 
@@ -190,12 +197,12 @@ defmodule CxLeaderboard.EtsStore.Ets do
     name |> meta_table_name() |> :ets.new(@meta_table_settings)
   end
 
-  defp create_entries_table(name, timestamp) do
-    :ets.new(:"cxlb_#{name}_entries_#{timestamp}", @entries_table_settings)
+  defp create_entries_table(name, suffix \\ get_rand_suffix()) do
+    :ets.new(:"cxlb_#{name}_entries_#{suffix}", @entries_table_settings)
   end
 
-  defp create_index_table(name, timestamp) do
-    :ets.new(:"cxlb_#{name}_index_#{timestamp}", @index_table_settings)
+  defp create_index_table(name, suffix \\ get_rand_suffix()) do
+    :ets.new(:"cxlb_#{name}_index_#{suffix}", @index_table_settings)
   end
 
   defp lookup(table_name, key) do

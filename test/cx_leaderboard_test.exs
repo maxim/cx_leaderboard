@@ -87,6 +87,18 @@ defmodule CxLeaderboardTest do
            ] == top
   end
 
+  test "supports adding individual entries when empty", %{board: board} do
+    top =
+      board
+      |> CxLeaderboard.add!({-20, :id1})
+      |> CxLeaderboard.top()
+      |> Enum.take(1)
+
+    assert [
+             {{-20, :id1}, :id1, {0, 1, 50.0, 0, 1}}
+           ] == top
+  end
+
   test "supports removing individual entries", %{board: board} do
     top =
       board
