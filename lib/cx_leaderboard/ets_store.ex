@@ -54,6 +54,16 @@ defmodule CxLeaderboard.EtsStore do
     Ets.count(name)
   end
 
-  defp format_multi_call_reply(replies = {_, []}), do: {:ok, replies}
+  defp format_multi_call_reply(replies = {nodes, []}) do
+    if Enum.any?(nodes, fn
+         {_, {:error, _}} -> true
+         _ -> false
+       end) do
+      {:error, replies}
+    else
+      {:ok, replies}
+    end
+  end
+
   defp format_multi_call_reply(replies), do: {:error, replies}
 end

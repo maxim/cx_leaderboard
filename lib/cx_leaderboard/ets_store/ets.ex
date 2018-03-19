@@ -36,9 +36,15 @@ defmodule CxLeaderboard.EtsStore.Ets do
   end
 
   def add(name, entry) do
-    modify_with_reindex(name, +1, fn table ->
-      :ets.insert(table, format_entry(entry))
-    end)
+    case format_entry(entry) do
+      {:error, reason} ->
+        {:error, reason}
+
+      formatted_entry ->
+        modify_with_reindex(name, +1, fn table ->
+          :ets.insert(table, formatted_entry)
+        end)
+    end
   end
 
   def remove(name, id) do
@@ -161,12 +167,17 @@ defmodule CxLeaderboard.EtsStore.Ets do
   defp build_data_stream(data) do
     data
     |> Stream.map(&format_entry/1)
+    |> Stream.reject(fn
+      {:error, _} -> true
+      _ -> false
+    end)
   end
 
   defp format_entry(entry = {{_, _, _}, _}), do: entry
   defp format_entry(entry = {{_, _}, _}), do: entry
   defp format_entry(entry = {_, _, id}), do: {entry, id}
   defp format_entry(entry = {_, id}), do: {entry, id}
+  defp format_entry(_), do: {:error, :bad_entry}
 
   defp set_meta(name, record) do
     name

@@ -111,4 +111,24 @@ defmodule CxLeaderboardTest do
              {{-30, :id2}, :id2, {0, 1, 50.0, 0, 1}}
            ] == top
   end
+
+  test "gracefully handles invalid entries", %{board: board} do
+    assert {:error, {[nonode@nohost: {:error, :bad_entry}], []}} =
+             CxLeaderboard.add(board, {-20, :tiebreak, :id1, :oops})
+  end
+
+  test "ignores invalid entries when populating", %{board: board} do
+    top =
+      board
+      |> CxLeaderboard.populate!([
+        {-20, :tiebreak, :id1, :oops},
+        {-30, :tiebreak, :id2}
+      ])
+      |> CxLeaderboard.top()
+      |> Enum.take(2)
+
+    assert [
+             {{-30, :tiebreak, :id2}, :id2, {0, 1, 50.0, 0, 1}}
+           ] == top
+  end
 end

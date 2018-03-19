@@ -6,8 +6,9 @@ defmodule CxLeaderboard do
     - [DONE] Rewrite Index.build
     - [DONE] Allow add/remove entries (rebuild only index) but still leave
       populate() function for initial setup
-    - Decide how to handle invalid entries
+    - [DONE] Decide how to handle invalid entries
     - [DONE] Move Server logic under EtsStore
+    - Formalize storage as a behaviour
     - Add benchmark
     - Figure out how to reuse this library at Crossfield
     - Docs
