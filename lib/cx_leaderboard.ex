@@ -8,6 +8,7 @@ defmodule CxLeaderboard do
       populate() function for initial setup
     - Decide how to handle invalid entries
     - [DONE] Move Server logic under EtsStore
+    - Add benchmark
     - Figure out how to reuse this library at Crossfield
     - Docs
     - Typespecs
@@ -33,33 +34,70 @@ defmodule CxLeaderboard do
 
   def create(name, kwargs \\ []) do
     store = Keyword.get(kwargs, :store, CxLeaderboard.EtsStore)
-    reply = store.create(name)
-    %Leaderboard{id: name, store: store, reply: reply}
+
+    case store.create(name) do
+      :ok ->
+        {:ok, %Leaderboard{id: name, store: store}}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def create!(name, kwargs \\ []) do
+    {:ok, board} = create(name, kwargs)
+    board
   end
 
   def destroy(lb = %Leaderboard{id: id, store: store}) do
-    reply = store.destroy(id)
-    Map.put(lb, :reply, reply)
+    case store.destroy(id) do
+      :ok ->
+        {:ok, lb}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
-  def populate(lb = %Leaderboard{id: id, store: store}, data) do
-    reply = store.populate(id, data)
-    Map.put(lb, :reply, reply)
+  def destroy!(lb) do
+    {:ok, _} = destroy(lb)
+    lb
   end
 
-  def async_populate(lb = %Leaderboard{id: id, store: store}, data) do
-    reply = store.async_populate(id, data)
-    Map.put(lb, :reply, reply)
+  def populate(%Leaderboard{id: id, store: store}, data) do
+    store.populate(id, data)
   end
 
-  def add(lb = %Leaderboard{id: id, store: store}, entry) do
-    reply = store.add(id, entry)
-    Map.put(lb, :reply, reply)
+  def populate!(lb, data) do
+    {:ok, _} = populate(lb, data)
+    lb
   end
 
-  def remove(lb = %Leaderboard{id: id, store: store}, entry_id) do
-    reply = store.remove(id, entry_id)
-    Map.put(lb, :reply, reply)
+  def async_populate(%Leaderboard{id: id, store: store}, data) do
+    store.async_populate(id, data)
+  end
+
+  def async_populate!(lb, data) do
+    {:ok, _} = async_populate(lb, data)
+    lb
+  end
+
+  def add(%Leaderboard{id: id, store: store}, entry) do
+    store.add(id, entry)
+  end
+
+  def add!(lb, entry) do
+    {:ok, _} = add(lb, entry)
+    lb
+  end
+
+  def remove(%Leaderboard{id: id, store: store}, entry_id) do
+    store.remove(id, entry_id)
+  end
+
+  def remove!(lb, entry_id) do
+    {:ok, _} = remove(lb, entry_id)
+    lb
   end
 
   ## Reader functions

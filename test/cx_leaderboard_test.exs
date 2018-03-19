@@ -3,14 +3,14 @@ defmodule CxLeaderboardTest do
   doctest CxLeaderboard
 
   setup do
-    board = CxLeaderboard.create(:test_board)
+    board = CxLeaderboard.create!(:test_board)
     {:ok, board: board}
   end
 
   test "keeps entry count", %{board: board} do
     board =
       board
-      |> CxLeaderboard.populate([
+      |> CxLeaderboard.populate!([
         {-20, :id1},
         {-30, :id2}
       ])
@@ -21,7 +21,7 @@ defmodule CxLeaderboardTest do
   test "returns top entries", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate([
+      |> CxLeaderboard.populate!([
         {-20, :id1},
         {-30, :id2}
       ])
@@ -37,7 +37,7 @@ defmodule CxLeaderboardTest do
   test "supports payloads in each entry", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate([
+      |> CxLeaderboard.populate!([
         {{-20, :id1}, %{foo: "foo"}},
         {{-30, :id2}, %{bar: "bar"}}
       ])
@@ -53,7 +53,7 @@ defmodule CxLeaderboardTest do
   test "supports tiebreaks in each entry", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate([
+      |> CxLeaderboard.populate!([
         {-20, 2, :id1},
         {-20, 1, :id2},
         {-30, 3, :id3},
@@ -73,9 +73,9 @@ defmodule CxLeaderboardTest do
   test "supports adding individual entries", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate([{-20, :id1}, {-30, :id2}])
-      |> CxLeaderboard.add({-40, :id3})
-      |> CxLeaderboard.add({-40, :id4})
+      |> CxLeaderboard.populate!([{-20, :id1}, {-30, :id2}])
+      |> CxLeaderboard.add!({-40, :id3})
+      |> CxLeaderboard.add!({-40, :id4})
       |> CxLeaderboard.top()
       |> Enum.take(4)
 
@@ -90,8 +90,8 @@ defmodule CxLeaderboardTest do
   test "supports removing individual entries", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate([{-20, :id1}, {-30, :id2}])
-      |> CxLeaderboard.remove(:id1)
+      |> CxLeaderboard.populate!([{-20, :id1}, {-30, :id2}])
+      |> CxLeaderboard.remove!(:id1)
       |> CxLeaderboard.top()
       |> Enum.take(2)
 

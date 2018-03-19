@@ -4,28 +4,40 @@ defmodule CxLeaderboard.EtsStore do
   ## Writers
 
   def create(name) do
-    response = {:ok, _} = GenServer.start_link(Writer, name, name: name)
-    response
+    case GenServer.start_link(Writer, name, name: name) do
+      {:ok, _} -> :ok
+      error -> error
+    end
   end
 
   def destroy(name) do
-    GenServer.stop(name)
+    case GenServer.stop(name) do
+      :ok -> :ok
+      error -> error
+    end
   end
 
   def populate(name, data) do
-    GenServer.multi_call(name, {:populate, data})
+    name
+    |> GenServer.multi_call({:populate, data})
+    |> format_multi_call_reply()
   end
 
   def async_populate(name, data) do
-    GenServer.abcast(name, {:populate, data})
+    :abcast = GenServer.abcast(name, {:populate, data})
+    {:ok, :abcast}
   end
 
   def add(name, entry) do
-    GenServer.multi_call(name, {:add, entry})
+    name
+    |> GenServer.multi_call({:add, entry})
+    |> format_multi_call_reply()
   end
 
   def remove(name, id) do
-    GenServer.multi_call(name, {:remove, id})
+    name
+    |> GenServer.multi_call({:remove, id})
+    |> format_multi_call_reply()
   end
 
   ## Readers
@@ -41,4 +53,7 @@ defmodule CxLeaderboard.EtsStore do
   def count(name) do
     Ets.count(name)
   end
+
+  defp format_multi_call_reply(replies = {_, []}), do: {:ok, replies}
+  defp format_multi_call_reply(replies), do: {:error, replies}
 end
