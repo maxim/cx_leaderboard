@@ -131,4 +131,20 @@ defmodule CxLeaderboardTest do
              {{-30, :tiebreak, :id2}, :id2, {0, 1, 50.0, 0, 1}}
            ] == top
   end
+
+  test "anything can be a score", %{board: board} do
+    top =
+      board
+      |> CxLeaderboard.populate!([
+        {"a", :id1},
+        {"b", :id2}
+      ])
+      |> CxLeaderboard.top()
+      |> Enum.take(2)
+
+    assert [
+             {{"a", :id1}, :id1, {0, 1, 75.0, 1, 1}},
+             {{"b", :id2}, :id2, {1, 2, 25.0, 0, 1}}
+           ] == top
+  end
 end

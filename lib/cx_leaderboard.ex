@@ -8,7 +8,10 @@ defmodule CxLeaderboard do
       populate() function for initial setup
     - [DONE] Decide how to handle invalid entries
     - [DONE] Move Server logic under EtsStore
-    - Formalize storage as a behaviour
+    - [DONE] Formalize storage as a behaviour
+    - Implement update function
+    - Implement scoping
+    - Implement status fetching
     - Add benchmark
     - Figure out how to reuse this library at Crossfield
     - Docs

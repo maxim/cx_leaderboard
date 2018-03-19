@@ -1,4 +1,5 @@
 defmodule CxLeaderboard.EtsStore do
+  @behaviour CxLeaderboard.Storage
   alias CxLeaderboard.EtsStore.{Ets, Writer}
 
   ## Writers
@@ -53,6 +54,8 @@ defmodule CxLeaderboard.EtsStore do
   def count(name) do
     Ets.count(name)
   end
+
+  ## Private
 
   defp format_multi_call_reply(replies = {nodes, []}) do
     if Enum.any?(nodes, fn
