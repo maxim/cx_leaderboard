@@ -41,7 +41,8 @@ defmodule CxLeaderboard do
     - [DONE] Move data stream processing (and format_entry) out of storage
     - [DONE] Add add_or_update for more efficient upsert
     - [DONE] Add get top-level function
-    - Implement scoping
+    - Implement scoping by ids
+    - Implement "around" featureset
     - Implement status fetching
     - Add benchmark
     - Figure out how to reuse this library at Crossfield

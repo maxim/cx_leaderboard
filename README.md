@@ -23,7 +23,7 @@ records = CxLeaderboard.top(board) |> Enum.take(2)
 * Concurrent reads, sequential writes
 * Stream API access to top entries
 * O(1) querying of any entry by id
-* Dynamic subset leaderboards
+* Dynamic subset leaderboards (scoping)
 * Atomic rebuilds in O(2n log n) time
 * Multi-node control
 
