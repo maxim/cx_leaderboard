@@ -139,6 +139,31 @@ defmodule CxLeaderboardTest do
            ] == top
   end
 
+  test "supports adding via atomic add_or_update", %{board: board} do
+    top =
+      board
+      |> CxLeaderboard.add_or_update!({-10, :id1})
+      |> CxLeaderboard.top()
+      |> Enum.take(1)
+
+    assert [
+             {{-10, :id1}, :id1, {0, 1, 50.0, 0, 1}}
+           ] == top
+  end
+
+  test "supports updating via atomic add_or_update", %{board: board} do
+    top =
+      board
+      |> CxLeaderboard.add!({-10, :id1})
+      |> CxLeaderboard.add_or_update!({-20, :id1})
+      |> CxLeaderboard.top()
+      |> Enum.take(2)
+
+    assert [
+             {{-20, :id1}, :id1, {0, 1, 50.0, 0, 1}}
+           ] == top
+  end
+
   test "gracefully handles invalid entries", %{board: board} do
     assert {:error, :bad_entry} =
              CxLeaderboard.add(board, {-20, :tiebreak, :id1, :oops})

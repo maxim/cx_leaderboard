@@ -11,7 +11,8 @@ defmodule CxLeaderboard do
     - [DONE] Formalize storage as a behaviour
     - [DONE] Implement update function
     - [DONE] Move data stream processing (and format_entry) out of storage
-    - Add add_or_update for more efficient upsert
+    - [DONE] Add add_or_update for more efficient upsert
+    - Add get top-level function
     - Implement scoping
     - Implement status fetching
     - Add benchmark
@@ -109,6 +110,18 @@ defmodule CxLeaderboard do
 
   def update!(lb, entry) do
     {:ok, _} = update(lb, entry)
+    lb
+  end
+
+  def add_or_update(%Leaderboard{id: id, store: store}, entry) do
+    case Entry.format(entry) do
+      error = {:error, _} -> error
+      entry -> store.add_or_update(id, entry)
+    end
+  end
+
+  def add_or_update!(lb, entry) do
+    {:ok, _} = add_or_update(lb, entry)
     lb
   end
 

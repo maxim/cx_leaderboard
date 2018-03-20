@@ -45,6 +45,13 @@ defmodule CxLeaderboard.Storage do
   @callback update(Leaderboard.id(), Entry.t()) :: {:ok, term} | {:error, term}
 
   @doc """
+  Atomically insert an entry, or update it if its id already exists in the
+  leaderboard.
+  """
+  @callback add_or_update(Leaderboard.id(), Entry.t()) ::
+              {:ok, term} | {:error, term}
+
+  @doc """
   Return a leaderboard record by its id. Return nil if not found.
   """
   @callback get(Leaderboard.id(), Entry.id()) :: Record.t() | nil

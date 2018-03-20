@@ -19,9 +19,7 @@ defmodule CxLeaderboard.EtsStore do
   end
 
   def populate(name, data) do
-    name
-    |> GenServer.multi_call({:populate, data})
-    |> format_multi_call_reply()
+    process_multi_call(name, {:populate, data})
   end
 
   def async_populate(name, data) do
@@ -30,21 +28,19 @@ defmodule CxLeaderboard.EtsStore do
   end
 
   def add(name, entry) do
-    name
-    |> GenServer.multi_call({:add, entry})
-    |> format_multi_call_reply()
+    process_multi_call(name, {:add, entry})
   end
 
   def remove(name, id) do
-    name
-    |> GenServer.multi_call({:remove, id})
-    |> format_multi_call_reply()
+    process_multi_call(name, {:remove, id})
   end
 
   def update(name, entry) do
-    name
-    |> GenServer.multi_call({:update, entry})
-    |> format_multi_call_reply()
+    process_multi_call(name, {:update, entry})
+  end
+
+  def add_or_update(name, entry) do
+    process_multi_call(name, {:add_or_update, entry})
   end
 
   ## Readers
@@ -62,6 +58,12 @@ defmodule CxLeaderboard.EtsStore do
   end
 
   ## Private
+
+  defp process_multi_call(name, message) do
+    name
+    |> GenServer.multi_call(message)
+    |> format_multi_call_reply()
+  end
 
   defp format_multi_call_reply(replies = {nodes, []}) do
     if Enum.any?(nodes, fn

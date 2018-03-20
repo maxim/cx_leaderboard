@@ -28,4 +28,9 @@ defmodule CxLeaderboard.EtsStore.Writer do
     result = Ets.update(name, entry)
     {:reply, result, name}
   end
+
+  def handle_call({:add_or_update, entry}, _from, name) do
+    result = Ets.add_or_update(name, entry)
+    {:reply, result, name}
+  end
 end

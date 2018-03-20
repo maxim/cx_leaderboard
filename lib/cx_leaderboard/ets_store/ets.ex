@@ -72,7 +72,24 @@ defmodule CxLeaderboard.EtsStore.Ets do
       {key, _, _} ->
         modify_with_reindex(name, 0, fn table ->
           :ets.delete(table, key)
-          :ets.insert_new(table, entry)
+          :ets.insert(table, entry)
+        end)
+    end
+  end
+
+  def add_or_update(name, entry) do
+    id = Entry.get_id(entry)
+
+    case get(name, id) do
+      nil ->
+        modify_with_reindex(name, +1, fn table ->
+          :ets.insert(table, entry)
+        end)
+
+      {key, _, _} ->
+        modify_with_reindex(name, 0, fn table ->
+          :ets.delete(table, key)
+          :ets.insert(table, entry)
         end)
     end
   end
