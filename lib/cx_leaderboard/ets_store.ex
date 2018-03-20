@@ -45,17 +45,9 @@ defmodule CxLeaderboard.EtsStore do
 
   ## Readers
 
-  def get(name, id) do
-    Ets.get(name, id)
-  end
-
-  def top(name) do
-    Ets.top(name)
-  end
-
-  def count(name) do
-    Ets.count(name)
-  end
+  defdelegate get(name, id), to: Ets
+  defdelegate top(name), to: Ets
+  defdelegate count(name), to: Ets
 
   ## Private
 
