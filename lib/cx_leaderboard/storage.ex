@@ -1,5 +1,5 @@
 defmodule CxLeaderboard.Storage do
-  alias CxLeaderboard.Leaderboard
+  alias CxLeaderboard.{Leaderboard, Entry, Record}
 
   @doc """
   Create a leaderboard in your storage identified with the provided atom.
@@ -12,54 +12,42 @@ defmodule CxLeaderboard.Storage do
   @callback destroy(Leaderboard.id()) :: :ok | {:error, term}
 
   @doc """
-  Replace all data in the leaderboard at a given id with the provided data.
-
-  Notes:
-
-    - It's advisable to skip any invalid entries silently
-    - Block until completed
+  Replace all data in the leaderboard with the data in the provided stream.
+  Block until completed.
   """
   @callback populate(Leaderboard.id(), Enumerable.t()) ::
               {:ok, term} | {:error, term}
 
   @doc """
-  Replace all data in the leaderboard at a given id with the provided data.
-
-  Notes:
-
-    - It's advisable to skip any invalid entries silently
-    - Return immediately, perform most of the work asynchronously
+  Replace all data in the leaderboard with the data in the provided stream.
+  Return immediately, perform most of the work asynchronously.
   """
   @callback async_populate(Leaderboard.id(), Enumerable.t()) ::
               {:ok, term} | {:error, term}
 
   @doc """
-  Add a single entry to the leaderboard. Return an error if an entry is invalid.
-  The operation should be blocking.
+  Add a single entry to the leaderboard. Return an error if the entry is already
+  in the leaderboard. The operation should be blocking.
   """
-  @callback add(Leaderboard.id(), Leaderboard.entry()) ::
-              {:ok, term} | {:error, term}
+  @callback add(Leaderboard.id(), Entry.t()) :: {:ok, term} | {:error, term}
 
   @doc """
   Remove a single entry from the leaderboard based on its id. Return an error if
   the id does not exist. The operation should be blocking.
   """
-  @callback remove(Leaderboard.id(), Leaderboard.entry_id()) ::
+  @callback remove(Leaderboard.id(), Entry.id()) ::
               {:ok, term} | {:error, term}
 
   @doc """
-  Update a single entry in the leaderboard. Expect the entry to have an id that
-  already exists in the leaderboard, otherwise return an error. The operation
-  should be blocking.
+  Update a single entry in the leaderboard. Return an error if the entry is not
+  found in the leaderboard. The operation should be blocking.
   """
-  @callback update(Leaderboard.id(), Leaderboard.entry()) ::
-              {:ok, term} | {:error, term}
+  @callback update(Leaderboard.id(), Entry.t()) :: {:ok, term} | {:error, term}
 
   @doc """
   Return a leaderboard record by its id. Return nil if not found.
   """
-  @callback get(Leaderboard.id(), Leaderboard.entry_id()) ::
-              Leaderboard.record() | nil
+  @callback get(Leaderboard.id(), Entry.id()) :: Record.t() | nil
 
   @doc """
   Return a correctly ordered stream of top leaderboard records that can be

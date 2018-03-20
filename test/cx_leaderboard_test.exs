@@ -140,7 +140,7 @@ defmodule CxLeaderboardTest do
   end
 
   test "gracefully handles invalid entries", %{board: board} do
-    assert {:error, {[nonode@nohost: {:error, :bad_entry}], []}} =
+    assert {:error, :bad_entry} =
              CxLeaderboard.add(board, {-20, :tiebreak, :id1, :oops})
   end
 

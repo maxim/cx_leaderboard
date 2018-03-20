@@ -1,5 +1,6 @@
 defmodule CxLeaderboard.EtsStore.Ets do
   alias CxLeaderboard.EtsStore.Index
+  alias CxLeaderboard.Entry
 
   @meta_table_settings [
     :set,
@@ -36,14 +37,16 @@ defmodule CxLeaderboard.EtsStore.Ets do
   end
 
   def add(name, entry) do
-    case format_entry(entry) do
-      {:error, reason} ->
-        {:error, reason}
+    id = Entry.get_id(entry)
 
-      formatted_entry ->
+    case get(name, id) do
+      nil ->
         modify_with_reindex(name, +1, fn table ->
-          :ets.insert(table, formatted_entry)
+          :ets.insert(table, entry)
         end)
+
+      _ ->
+        {:error, :entry_already_exists}
     end
   end
 
@@ -60,11 +63,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
   end
 
   def update(name, entry) do
-    {id, formatted_entry} =
-      case format_entry(entry) do
-        entry = {{_, id}, _} -> {id, entry}
-        entry = {{_, _, id}, _} -> {id, entry}
-      end
+    id = Entry.get_id(entry)
 
     case get(name, id) do
       nil ->
@@ -73,7 +72,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
       {key, _, _} ->
         modify_with_reindex(name, 0, fn table ->
           :ets.delete(table, key)
-          :ets.insert_new(table, formatted_entry)
+          :ets.insert_new(table, entry)
         end)
     end
   end
@@ -161,8 +160,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
 
   defp insert_entries(name, data, suffix) do
     table = create_entries_table(name, suffix)
-    data_stream = build_data_stream(data)
-    count = Enum.count(data_stream, &:ets.insert(table, &1))
+    count = Enum.count(data, &:ets.insert(table, &1))
     {table, count}
   end
 
@@ -182,21 +180,6 @@ defmodule CxLeaderboard.EtsStore.Ets do
       key -> {key, :ets.next(table_name, key)}
     end)
   end
-
-  defp build_data_stream(data) do
-    data
-    |> Stream.map(&format_entry/1)
-    |> Stream.reject(fn
-      {:error, _} -> true
-      _ -> false
-    end)
-  end
-
-  defp format_entry(entry = {{_, _, _}, _}), do: entry
-  defp format_entry(entry = {{_, _}, _}), do: entry
-  defp format_entry(entry = {_, _, id}), do: {entry, id}
-  defp format_entry(entry = {_, id}), do: {entry, id}
-  defp format_entry(_), do: {:error, :bad_entry}
 
   defp set_meta(name, record) do
     name

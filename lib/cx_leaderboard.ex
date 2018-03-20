@@ -10,9 +10,10 @@ defmodule CxLeaderboard do
     - [DONE] Move Server logic under EtsStore
     - [DONE] Formalize storage as a behaviour
     - [DONE] Implement update function
+    - [DONE] Move data stream processing (and format_entry) out of storage
+    - Add add_or_update for more efficient upsert
     - Implement scoping
     - Implement status fetching
-    - Move data stream processing (and format_entry) out of storage
     - Add benchmark
     - Figure out how to reuse this library at Crossfield
     - Docs
@@ -20,7 +21,7 @@ defmodule CxLeaderboard do
     - More tests
   """
 
-  alias CxLeaderboard.Leaderboard
+  alias CxLeaderboard.{Leaderboard, Entry}
 
   @doc """
   Hello world.
@@ -70,25 +71,28 @@ defmodule CxLeaderboard do
   end
 
   def populate(%Leaderboard{id: id, store: store}, data) do
-    store.populate(id, data)
+    store.populate(id, build_data_stream(data))
   end
 
   def populate!(lb, data) do
-    {:ok, _} = populate(lb, data)
+    {:ok, _} = populate(lb, build_data_stream(data))
     lb
   end
 
   def async_populate(%Leaderboard{id: id, store: store}, data) do
-    store.async_populate(id, data)
+    store.async_populate(id, build_data_stream(data))
   end
 
   def async_populate!(lb, data) do
-    {:ok, _} = async_populate(lb, data)
+    {:ok, _} = async_populate(lb, build_data_stream(data))
     lb
   end
 
   def add(%Leaderboard{id: id, store: store}, entry) do
-    store.add(id, entry)
+    case Entry.format(entry) do
+      error = {:error, _} -> error
+      entry -> store.add(id, entry)
+    end
   end
 
   def add!(lb, entry) do
@@ -97,7 +101,10 @@ defmodule CxLeaderboard do
   end
 
   def update(%Leaderboard{id: id, store: store}, entry) do
-    store.update(id, entry)
+    case Entry.format(entry) do
+      error = {:error, _} -> error
+      entry -> store.update(id, entry)
+    end
   end
 
   def update!(lb, entry) do
@@ -122,5 +129,16 @@ defmodule CxLeaderboard do
 
   def count(%Leaderboard{id: id, store: store}) do
     store.count(id)
+  end
+
+  ## Private
+
+  defp build_data_stream(data) do
+    data
+    |> Stream.map(&Entry.format/1)
+    |> Stream.reject(fn
+      {:error, _} -> true
+      _ -> false
+    end)
   end
 end
