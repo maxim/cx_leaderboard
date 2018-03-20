@@ -4,7 +4,7 @@ defmodule CxLeaderboard.Storage do
   @doc """
   Create a leaderboard in your storage identified with the provided atom.
   """
-  @callback create(Leaderboard.id()) :: :ok | {:error, term}
+  @callback create(Leaderboard.id()) :: {:ok, Leaderboard.t()} | {:error, term}
 
   @doc """
   Destroy all the data in your storage for the given leaderboard id.
