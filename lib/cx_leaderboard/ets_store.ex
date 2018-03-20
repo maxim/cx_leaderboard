@@ -41,6 +41,12 @@ defmodule CxLeaderboard.EtsStore do
     |> format_multi_call_reply()
   end
 
+  def update(name, entry) do
+    name
+    |> GenServer.multi_call({:update, entry})
+    |> format_multi_call_reply()
+  end
+
   ## Readers
 
   def get(name, id) do

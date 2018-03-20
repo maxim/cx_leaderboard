@@ -99,6 +99,33 @@ defmodule CxLeaderboardTest do
            ] == top
   end
 
+  test "supports updating individual entries", %{board: board} do
+    top =
+      board
+      |> CxLeaderboard.populate!([
+        {-20, :id1},
+        {-30, :id2}
+      ])
+      |> CxLeaderboard.top()
+      |> Enum.take(2)
+
+    assert [
+             {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}},
+             {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}}
+           ] == top
+
+    top =
+      board
+      |> CxLeaderboard.update!({-10, :id2})
+      |> CxLeaderboard.top()
+      |> Enum.take(3)
+
+    assert [
+             {{-20, :id1}, :id1, {0, 1, 75.0, 1, 1}},
+             {{-10, :id2}, :id2, {1, 2, 25.0, 0, 1}}
+           ] == top
+  end
+
   test "supports removing individual entries", %{board: board} do
     top =
       board

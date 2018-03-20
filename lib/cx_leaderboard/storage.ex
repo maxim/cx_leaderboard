@@ -48,6 +48,14 @@ defmodule CxLeaderboard.Storage do
               {:ok, term} | {:error, term}
 
   @doc """
+  Update a single entry in the leaderboard. Expect the entry to have an id that
+  already exists in the leaderboard, otherwise return an error. The operation
+  should be blocking.
+  """
+  @callback update(Leaderboard.id(), Leaderboard.entry()) ::
+              {:ok, term} | {:error, term}
+
+  @doc """
   Return a leaderboard record by its id. Return nil if not found.
   """
   @callback get(Leaderboard.id(), Leaderboard.entry_id()) ::

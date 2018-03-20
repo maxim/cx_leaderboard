@@ -59,6 +59,25 @@ defmodule CxLeaderboard.EtsStore.Ets do
     end
   end
 
+  def update(name, entry) do
+    {id, formatted_entry} =
+      case format_entry(entry) do
+        entry = {{_, id}, _} -> {id, entry}
+        entry = {{_, _, id}, _} -> {id, entry}
+      end
+
+    case get(name, id) do
+      nil ->
+        {:error, :key_not_found}
+
+      {key, _, _} ->
+        modify_with_reindex(name, 0, fn table ->
+          :ets.delete(table, key)
+          :ets.insert_new(table, formatted_entry)
+        end)
+    end
+  end
+
   def populate(name, data) do
     t1 = get_timestamp()
     set_meta(name, {:status, :populating})

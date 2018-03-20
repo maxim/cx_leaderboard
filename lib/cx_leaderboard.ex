@@ -9,9 +9,10 @@ defmodule CxLeaderboard do
     - [DONE] Decide how to handle invalid entries
     - [DONE] Move Server logic under EtsStore
     - [DONE] Formalize storage as a behaviour
-    - Implement update function
+    - [DONE] Implement update function
     - Implement scoping
     - Implement status fetching
+    - Move data stream processing (and format_entry) out of storage
     - Add benchmark
     - Figure out how to reuse this library at Crossfield
     - Docs
@@ -92,6 +93,15 @@ defmodule CxLeaderboard do
 
   def add!(lb, entry) do
     {:ok, _} = add(lb, entry)
+    lb
+  end
+
+  def update(%Leaderboard{id: id, store: store}, entry) do
+    store.update(id, entry)
+  end
+
+  def update!(lb, entry) do
+    {:ok, _} = update(lb, entry)
     lb
   end
 

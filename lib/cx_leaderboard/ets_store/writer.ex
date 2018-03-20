@@ -23,4 +23,9 @@ defmodule CxLeaderboard.EtsStore.Writer do
     result = Ets.remove(name, id)
     {:reply, result, name}
   end
+
+  def handle_call({:update, entry}, _from, name) do
+    result = Ets.update(name, entry)
+    {:reply, result, name}
+  end
 end
