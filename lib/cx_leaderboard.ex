@@ -12,7 +12,7 @@ defmodule CxLeaderboard do
     - [DONE] Implement update function
     - [DONE] Move data stream processing (and format_entry) out of storage
     - [DONE] Add add_or_update for more efficient upsert
-    - Add get top-level function
+    - [DONE] Add get top-level function
     - Implement scoping
     - Implement status fetching
     - Add benchmark
@@ -142,6 +142,10 @@ defmodule CxLeaderboard do
 
   def count(%Leaderboard{id: id, store: store}) do
     store.count(id)
+  end
+
+  def get(%Leaderboard{id: id, store: store}, entry_id) do
+    store.get(id, entry_id)
   end
 
   ## Private

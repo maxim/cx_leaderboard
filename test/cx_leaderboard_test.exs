@@ -199,4 +199,11 @@ defmodule CxLeaderboardTest do
              {{"b", :id2}, :id2, {1, 2, 25.0, 0, 1}}
            ] == top
   end
+
+  test "retrieves records via get", %{board: board} do
+    CxLeaderboard.populate!(board, [{-20, :id1}, {-30, :id2}])
+
+    assert {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}} ==
+             CxLeaderboard.get(board, :id1)
+  end
 end
