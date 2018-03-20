@@ -1,8 +1,36 @@
 defmodule CxLeaderboard do
   @moduledoc """
-  Documentation for CxLeaderboard.
+  Here is an example of how you can create and manage a leaderboard.
+
+      # Create a leaderboard
+      {:ok, board} = CxLeaderboard.create(:global)
+
+      # Put data into it
+      CxLeaderboard.populate!(board, [
+        {-20, :id1},
+        {-30, :id2}
+      ])
+
+      records =
+        CxLeaderboard.top(board)
+        |> Enum.take(2)
+
+      # Records
+      # {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}},
+      # {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}}
+
+      CxLeaderboard.update!(board, {-10, :id2})
+
+      records =
+        CxLeaderboard.top(board)
+        |> Enum.take(2)
+
+      # Records
+      # {{-20, :id1}, :id1, {0, 1, 75.0, 1, 1}},
+      # {{-10, :id2}, :id2, {1, 2, 25.0, 0, 1}}
 
   TODO:
+
     - [DONE] Rewrite Index.build
     - [DONE] Allow add/remove entries (rebuild only index) but still leave
       populate() function for initial setup

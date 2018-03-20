@@ -2,6 +2,21 @@
 
 A featureful, efficient leaderboard based on ets store. Supports records of any shape.
 
+```elixir
+{:ok, board} = CxLeaderboard.create(:global)
+
+CxLeaderboard.populate!(board, [
+  {-20, :id1},
+  {-30, :id2}
+])
+
+records = CxLeaderboard.top(board) |> Enum.take(2)
+
+# Records
+# {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}},
+# {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}}
+```
+
 ### Features
 
 * Ranks and percentiles
