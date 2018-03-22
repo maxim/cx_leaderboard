@@ -25,18 +25,18 @@ defmodule CxLeaderboard.Leaderboard do
     board
   end
 
-  def destroy(lb = %__MODULE__{state: state, store: store}) do
-    case store.destroy(state) do
-      :ok ->
-        {:ok, lb}
+  def clear(lb = %__MODULE__{state: state, store: store}) do
+    case store.clear(state) do
+      {:ok, state} ->
+        {:ok, Map.put(lb, :state, state)}
 
       {:error, reason} ->
         {:error, reason}
     end
   end
 
-  def destroy!(lb) do
-    {:ok, _} = destroy(lb)
+  def clear!(lb) do
+    {:ok, _} = clear(lb)
     lb
   end
 

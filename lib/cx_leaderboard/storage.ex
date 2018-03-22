@@ -7,9 +7,9 @@ defmodule CxLeaderboard.Storage do
   @callback create(keyword()) :: {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
-  Destroy all the data in your storage for the given leaderboard state.
+  Clear all the data in your leaderboard state.
   """
-  @callback destroy(Leaderboard.state()) :: :ok | {:error, term}
+  @callback clear(Leaderboard.state()) :: :ok | {:error, term}
 
   @doc """
   Replace all data in the leaderboard with the data in the provided stream.

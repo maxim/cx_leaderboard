@@ -13,10 +13,10 @@ defmodule CxLeaderboard.EtsStore do
     end
   end
 
-  def destroy(name) do
-    case GenServer.stop(name) do
-      :ok -> :ok
-      error -> error
+  def clear(name) do
+    with :ok <- GenServer.stop(name),
+         {:ok, _} <- GenServer.start_link(Writer, name, name: name) do
+      {:ok, name}
     end
   end
 
