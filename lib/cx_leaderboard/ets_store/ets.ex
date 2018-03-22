@@ -1,6 +1,5 @@
 defmodule CxLeaderboard.EtsStore.Ets do
-  alias CxLeaderboard.EtsStore.Index
-  alias CxLeaderboard.Entry
+  alias CxLeaderboard.{Indexer, Entry, Record}
 
   @meta_table_settings [
     :set,
@@ -149,6 +148,9 @@ defmodule CxLeaderboard.EtsStore.Ets do
     get_meta(name, :count)
   end
 
+  def scope(name, ids) do
+  end
+
   ## Private
 
   defp modify_with_reindex(name, count_delta, modification) do
@@ -183,7 +185,12 @@ defmodule CxLeaderboard.EtsStore.Ets do
 
   defp build_index(name, table, count, suffix \\ get_rand_suffix()) do
     index = create_index_table(name, suffix)
-    Index.build(table, index, count)
+
+    table
+    |> stream_keys()
+    |> Indexer.index(count)
+    |> Enum.each(&:ets.insert(index, &1))
+
     index
   end
 
