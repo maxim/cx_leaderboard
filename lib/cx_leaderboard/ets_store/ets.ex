@@ -1,5 +1,5 @@
 defmodule CxLeaderboard.EtsStore.Ets do
-  alias CxLeaderboard.{Indexer, Entry, Record}
+  alias CxLeaderboard.{Indexer, Entry}
 
   @meta_table_settings [
     :set,
