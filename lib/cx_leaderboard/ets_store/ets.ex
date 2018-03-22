@@ -151,13 +151,13 @@ defmodule CxLeaderboard.EtsStore.Ets do
 
   ## Private
 
-  defp modify_with_reindex(name, count_change, modification) do
+  defp modify_with_reindex(name, count_delta, modification) do
     t1 = get_timestamp()
     set_meta(name, {:status, :reindexing})
 
     table = get_meta(name, :entries_table_name)
     old_index = get_meta(name, :index_table_name)
-    new_count = get_meta(name, :count) + count_change
+    new_count = get_meta(name, :count) + count_delta
 
     modification.(table)
 
