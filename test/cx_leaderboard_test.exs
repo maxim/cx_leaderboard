@@ -1,31 +1,32 @@
 defmodule CxLeaderboardTest do
   use ExUnit.Case
+  alias CxLeaderboard.Leaderboard
   doctest CxLeaderboard
 
   setup do
-    board = CxLeaderboard.create!(:test_board)
+    board = Leaderboard.create!(name: :test_board)
     {:ok, board: board}
   end
 
   test "keeps entry count", %{board: board} do
     board =
       board
-      |> CxLeaderboard.populate!([
+      |> Leaderboard.populate!([
         {-20, :id1},
         {-30, :id2}
       ])
 
-    assert 2 == CxLeaderboard.count(board)
+    assert 2 == Leaderboard.count(board)
   end
 
   test "returns top entries", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate!([
+      |> Leaderboard.populate!([
         {-20, :id1},
         {-30, :id2}
       ])
-      |> CxLeaderboard.top()
+      |> Leaderboard.top()
       |> Enum.take(2)
 
     assert [
@@ -37,11 +38,11 @@ defmodule CxLeaderboardTest do
   test "supports payloads in each entry", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate!([
+      |> Leaderboard.populate!([
         {{-20, :id1}, %{foo: "foo"}},
         {{-30, :id2}, %{bar: "bar"}}
       ])
-      |> CxLeaderboard.top()
+      |> Leaderboard.top()
       |> Enum.take(2)
 
     assert [
@@ -53,13 +54,13 @@ defmodule CxLeaderboardTest do
   test "supports tiebreaks in each entry", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate!([
+      |> Leaderboard.populate!([
         {-20, 2, :id1},
         {-20, 1, :id2},
         {-30, 3, :id3},
         {-30, 4, :id4}
       ])
-      |> CxLeaderboard.top()
+      |> Leaderboard.top()
       |> Enum.take(4)
 
     assert [
@@ -73,10 +74,10 @@ defmodule CxLeaderboardTest do
   test "supports adding individual entries", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate!([{-20, :id1}, {-30, :id2}])
-      |> CxLeaderboard.add!({-40, :id3})
-      |> CxLeaderboard.add!({-40, :id4})
-      |> CxLeaderboard.top()
+      |> Leaderboard.populate!([{-20, :id1}, {-30, :id2}])
+      |> Leaderboard.add!({-40, :id3})
+      |> Leaderboard.add!({-40, :id4})
+      |> Leaderboard.top()
       |> Enum.take(4)
 
     assert [
@@ -90,8 +91,8 @@ defmodule CxLeaderboardTest do
   test "supports adding individual entries when empty", %{board: board} do
     top =
       board
-      |> CxLeaderboard.add!({-20, :id1})
-      |> CxLeaderboard.top()
+      |> Leaderboard.add!({-20, :id1})
+      |> Leaderboard.top()
       |> Enum.take(1)
 
     assert [
@@ -102,11 +103,11 @@ defmodule CxLeaderboardTest do
   test "supports updating individual entries", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate!([
+      |> Leaderboard.populate!([
         {-20, :id1},
         {-30, :id2}
       ])
-      |> CxLeaderboard.top()
+      |> Leaderboard.top()
       |> Enum.take(2)
 
     assert [
@@ -116,8 +117,8 @@ defmodule CxLeaderboardTest do
 
     top =
       board
-      |> CxLeaderboard.update!({-10, :id2})
-      |> CxLeaderboard.top()
+      |> Leaderboard.update!({-10, :id2})
+      |> Leaderboard.top()
       |> Enum.take(3)
 
     assert [
@@ -129,9 +130,9 @@ defmodule CxLeaderboardTest do
   test "supports removing individual entries", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate!([{-20, :id1}, {-30, :id2}])
-      |> CxLeaderboard.remove!(:id1)
-      |> CxLeaderboard.top()
+      |> Leaderboard.populate!([{-20, :id1}, {-30, :id2}])
+      |> Leaderboard.remove!(:id1)
+      |> Leaderboard.top()
       |> Enum.take(2)
 
     assert [
@@ -142,8 +143,8 @@ defmodule CxLeaderboardTest do
   test "supports adding via atomic add_or_update", %{board: board} do
     top =
       board
-      |> CxLeaderboard.add_or_update!({-10, :id1})
-      |> CxLeaderboard.top()
+      |> Leaderboard.add_or_update!({-10, :id1})
+      |> Leaderboard.top()
       |> Enum.take(1)
 
     assert [
@@ -154,9 +155,9 @@ defmodule CxLeaderboardTest do
   test "supports updating via atomic add_or_update", %{board: board} do
     top =
       board
-      |> CxLeaderboard.add!({-10, :id1})
-      |> CxLeaderboard.add_or_update!({-20, :id1})
-      |> CxLeaderboard.top()
+      |> Leaderboard.add!({-10, :id1})
+      |> Leaderboard.add_or_update!({-20, :id1})
+      |> Leaderboard.top()
       |> Enum.take(2)
 
     assert [
@@ -166,17 +167,17 @@ defmodule CxLeaderboardTest do
 
   test "gracefully handles invalid entries", %{board: board} do
     assert {:error, :bad_entry} =
-             CxLeaderboard.add(board, {-20, :tiebreak, :id1, :oops})
+             Leaderboard.add(board, {-20, :tiebreak, :id1, :oops})
   end
 
   test "ignores invalid entries when populating", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate!([
+      |> Leaderboard.populate!([
         {-20, :tiebreak, :id1, :oops},
         {-30, :tiebreak, :id2}
       ])
-      |> CxLeaderboard.top()
+      |> Leaderboard.top()
       |> Enum.take(2)
 
     assert [
@@ -187,11 +188,11 @@ defmodule CxLeaderboardTest do
   test "anything can be a score", %{board: board} do
     top =
       board
-      |> CxLeaderboard.populate!([
+      |> Leaderboard.populate!([
         {"a", :id1},
         {"b", :id2}
       ])
-      |> CxLeaderboard.top()
+      |> Leaderboard.top()
       |> Enum.take(2)
 
     assert [
@@ -201,9 +202,9 @@ defmodule CxLeaderboardTest do
   end
 
   test "retrieves records via get", %{board: board} do
-    CxLeaderboard.populate!(board, [{-20, :id1}, {-30, :id2}])
+    Leaderboard.populate!(board, [{-20, :id1}, {-30, :id2}])
 
     assert {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}} ==
-             CxLeaderboard.get(board, :id1)
+             Leaderboard.get(board, :id1)
   end
 end

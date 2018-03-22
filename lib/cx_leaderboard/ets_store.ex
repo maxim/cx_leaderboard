@@ -4,9 +4,11 @@ defmodule CxLeaderboard.EtsStore do
 
   ## Writers
 
-  def create(name) do
+  def create(kwargs) do
+    name = Keyword.get(kwargs, :name)
+
     case GenServer.start_link(Writer, name, name: name) do
-      {:ok, _} -> :ok
+      {:ok, _} -> {:ok, name}
       error -> error
     end
   end
