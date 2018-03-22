@@ -148,9 +148,6 @@ defmodule CxLeaderboard.EtsStore.Ets do
     get_meta(name, :count)
   end
 
-  def scope(name, ids) do
-  end
-
   ## Private
 
   defp modify_with_reindex(name, count_delta, modification) do
