@@ -169,6 +169,20 @@ defmodule CxLeaderboard.EtsStore.Ets do
     end
   end
 
+  def bottom(name) do
+    table_name = get_meta(name, :entries_table_name)
+
+    if table_name do
+      reverse_stream_keys(table_name)
+      |> Stream.map(fn
+        {_, _, id} -> get(name, id)
+        {_, id} -> get(name, id)
+      end)
+    else
+      []
+    end
+  end
+
   def count(name) do
     get_meta(name, :count)
   end
@@ -245,6 +259,13 @@ defmodule CxLeaderboard.EtsStore.Ets do
     Stream.unfold(:ets.first(table_name), fn
       :"$end_of_table" -> nil
       key -> {key, :ets.next(table_name, key)}
+    end)
+  end
+
+  defp reverse_stream_keys(table_name) do
+    Stream.unfold(:ets.last(table_name), fn
+      :"$end_of_table" -> nil
+      key -> {key, :ets.prev(table_name, key)}
     end)
   end
 

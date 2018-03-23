@@ -31,6 +31,22 @@ defmodule CxLeaderboard.StorageCase do
                ] == top
       end
 
+      test "returns bottom entries", %{board: board} do
+        bottom =
+          board
+          |> Leaderboard.populate!([
+            {-20, :id1},
+            {-30, :id2}
+          ])
+          |> Leaderboard.bottom()
+          |> Enum.take(2)
+
+        assert [
+                 {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}},
+                 {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}}
+               ] == bottom
+      end
+
       test "supports payloads in each entry", %{board: board} do
         top =
           board

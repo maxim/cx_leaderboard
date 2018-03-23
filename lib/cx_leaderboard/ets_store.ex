@@ -49,6 +49,7 @@ defmodule CxLeaderboard.EtsStore do
 
   defdelegate get(name, id), to: Ets
   defdelegate top(name), to: Ets
+  defdelegate bottom(name), to: Ets
   defdelegate count(name), to: Ets
   defdelegate range(name, id, range), to: Ets
 

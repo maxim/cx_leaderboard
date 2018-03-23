@@ -99,6 +99,15 @@ defmodule CxLeaderboard.TermStore do
     end)
   end
 
+  def bottom(state = %{table: table}) do
+    table
+    |> Enum.reverse()
+    |> Stream.map(fn entry ->
+      id = Entry.get_id(entry)
+      get(state, id)
+    end)
+  end
+
   def count(%{table: table}) do
     Enum.count(table)
   end

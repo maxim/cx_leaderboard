@@ -126,6 +126,10 @@ defmodule CxLeaderboard.Leaderboard do
     store.top(state)
   end
 
+  def bottom(%__MODULE__{state: state, store: store}) do
+    store.bottom(state)
+  end
+
   def count(%__MODULE__{state: state, store: store}) do
     store.count(state)
   end
