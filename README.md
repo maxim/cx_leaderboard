@@ -5,14 +5,17 @@ A featureful, efficient leaderboard based on ets store. Supports records of any 
 ```elixir
 alias CxLeaderboard.Leaderboard
 
-{:ok, board} = Leaderboard.create(:global)
+board =
+  Leaderboard.create!(name: :global)
+  |> Leaderboard.populate!([
+    {-20, :id1},
+    {-30, :id2}
+  ])
 
-board = eaderboard.populate!(board, [
-  {-20, :id1},
-  {-30, :id2}
-])
-
-records = CxLeaderboard.top(board) |> Enum.take(2)
+records =
+  board
+  |> Leaderboard.top(board)
+  |> Enum.take(2)
 
 # Records
 # {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}},
