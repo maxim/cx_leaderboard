@@ -71,7 +71,9 @@ time: 5 s
 parallel: 1
 ```
 
-### Populating the leaderboard
+### Populating the leaderboard with 1mil entries
+
+Script: [benchmark/populate.exs](benchmark/populate.exs)
 
 ```
 Name           ips        average  deviation         median         99th %
@@ -92,6 +94,8 @@ The leaderboard is fully sorted and indexed at the end.
 
 ### Adding an entry to 1mil leaderboard
 
+Script: [benchmark/add_entry.exs](benchmark/add_entry.exs)
+
 ```
 Name           ips        average  deviation         median         99th %
 ets       148.85 K      0.00001 s   ±113.79%      0.00001 s      0.00002 s
@@ -105,6 +109,8 @@ term     0.00031 K - 479249.69x slower
 As you can see, you should not create a term leaderboard with a million entries, and especially not add more to it, it's designed for small leaderboards.
 
 ### Getting a -10..10 range from 1mil leaderboard
+
+Script: [benchmark/range.exs](benchmark/range.exs)
 
 ```
 Name           ips        average  deviation         median         99th %
