@@ -104,8 +104,6 @@ term     0.00596 K - 2748.72x slower
 
 Another example of how the term leaderboard is not intended for big number of entries.
 
-### Getting a range of entries from 1mil leaderboard
-
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/cx_leaderboard](https://hexdocs.pm/cx_leaderboard).
