@@ -43,7 +43,7 @@ defmodule CxLeaderboard do
     - [DONE] Move data stream processing (and format_entry) out of storage
     - [DONE] Add add_or_update for more efficient upsert
     - [DONE] Add get top-level function
-    - Implement scoping by ids
+    - [DONE] Implement scoping by ids (this is now possible with TermStore)
     - Implement "around" featureset
     - Implement status fetching
     - Add benchmark
