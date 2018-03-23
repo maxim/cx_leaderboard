@@ -26,7 +26,7 @@ defmodule CxLeaderboard.EtsStore do
 
   def async_populate(name, data) do
     :abcast = GenServer.abcast(name, {:populate, data})
-    {:ok, :abcast}
+    {:ok, name}
   end
 
   def add(name, entry) do

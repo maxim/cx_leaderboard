@@ -69,4 +69,6 @@ defmodule CxLeaderboard.Storage do
   Show the number of records in the leaderboard.
   """
   @callback count(Leaderboard.state()) :: non_neg_integer
+
+  @optional_callbacks async_populate: 2
 end

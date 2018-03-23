@@ -7,6 +7,11 @@ defmodule CxLeaderboard.EtsStore.Writer do
     {:ok, name}
   end
 
+  def handle_cast({:populate, data}, name) do
+    Ets.populate(name, data)
+    {:noreply, name}
+  end
+
   def handle_call({:populate, data}, _from, name) do
     result = Ets.populate(name, data)
     # secs = time / 1000

@@ -47,8 +47,10 @@ defmodule CxLeaderboard.Leaderboard do
     lb
   end
 
-  def async_populate(%__MODULE__{state: state, store: store}, data) do
-    store.async_populate(state, build_data_stream(data))
+  def async_populate(lb = %__MODULE__{state: state, store: store}, data) do
+    state
+    |> store.async_populate(build_data_stream(data))
+    |> update_state(lb)
   end
 
   def async_populate!(lb, data) do
