@@ -8,8 +8,11 @@ alias CxLeaderboard.Leaderboard
 board =
   Leaderboard.create!(name: :global)
   |> Leaderboard.populate!([
-    {-20, :id1},
-    {-30, :id2}
+    {-20, :id1}, # Entries are:
+    {-30, :id2}  # {{score, tiebreak (optional), id}, payload (optional)}
+    # If you don't need tiebreak or payload, then this format is fine.
+    # Id is used as the payload if none given.
+    # Note: here we use negative score numbers because we want descending sort.
   ])
 
 records =
@@ -17,8 +20,9 @@ records =
   |> Leaderboard.top(board)
   |> Enum.take(2)
 
-# Records
-# {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}},
+# Returned records (explained):
+# {{score, id}, payload, {index, rank, percentile, # lower scores, frequency}}
+# {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}} 
 # {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}}
 ```
 
