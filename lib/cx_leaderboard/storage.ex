@@ -9,14 +9,15 @@ defmodule CxLeaderboard.Storage do
   @doc """
   Clear all the data in your leaderboard state.
   """
-  @callback clear(Leaderboard.state()) :: :ok | {:error, term}
+  @callback clear(Leaderboard.state()) ::
+              {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Replace all data in the leaderboard with the data in the provided stream.
   Block until completed.
   """
   @callback populate(Leaderboard.state(), Enumerable.t()) ::
-              {:ok, term} | {:error, term}
+              {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Replace all data in the leaderboard with the data in the provided stream.
@@ -29,28 +30,29 @@ defmodule CxLeaderboard.Storage do
   Add a single entry to the leaderboard. Return an error if the entry is already
   in the leaderboard. The operation should be blocking.
   """
-  @callback add(Leaderboard.state(), Entry.t()) :: {:ok, term} | {:error, term}
+  @callback add(Leaderboard.state(), Entry.t()) ::
+              {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Remove a single entry from the leaderboard based on its id. Return an error if
   the id does not exist. The operation should be blocking.
   """
   @callback remove(Leaderboard.state(), Entry.id()) ::
-              {:ok, term} | {:error, term}
+              {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Update a single entry in the leaderboard. Return an error if the entry is not
   found in the leaderboard. The operation should be blocking.
   """
   @callback update(Leaderboard.state(), Entry.t()) ::
-              {:ok, term} | {:error, term}
+              {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Atomically insert an entry, or update it if its id already exists in the
   leaderboard.
   """
   @callback add_or_update(Leaderboard.state(), Entry.t()) ::
-              {:ok, term} | {:error, term}
+              {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Return a leaderboard record by its id. Return nil if not found.

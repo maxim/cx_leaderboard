@@ -56,19 +56,19 @@ defmodule CxLeaderboard.EtsStore do
   defp process_multi_call(name, message) do
     name
     |> GenServer.multi_call(message)
-    |> format_multi_call_reply()
+    |> format_multi_call_reply(name)
   end
 
-  defp format_multi_call_reply(replies = {nodes, []}) do
+  defp format_multi_call_reply(replies = {nodes, []}, name) do
     if Enum.any?(nodes, fn
          {_, {:error, _}} -> true
          _ -> false
        end) do
       {:error, replies}
     else
-      {:ok, replies}
+      {:ok, name}
     end
   end
 
-  defp format_multi_call_reply(replies), do: {:error, replies}
+  defp format_multi_call_reply(replies, _), do: {:error, replies}
 end

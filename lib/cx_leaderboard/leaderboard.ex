@@ -15,8 +15,8 @@ defmodule CxLeaderboard.Leaderboard do
       {:ok, state} ->
         {:ok, %__MODULE__{state: state, store: store}}
 
-      {:error, reason} ->
-        {:error, reason}
+      error ->
+        error
     end
   end
 
@@ -26,26 +26,24 @@ defmodule CxLeaderboard.Leaderboard do
   end
 
   def clear(lb = %__MODULE__{state: state, store: store}) do
-    case store.clear(state) do
-      {:ok, state} ->
-        {:ok, Map.put(lb, :state, state)}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
+    state
+    |> store.clear()
+    |> update_state(lb)
   end
 
   def clear!(lb) do
-    {:ok, _} = clear(lb)
+    {:ok, lb} = clear(lb)
     lb
   end
 
-  def populate(%__MODULE__{state: state, store: store}, data) do
-    store.populate(state, build_data_stream(data))
+  def populate(lb = %__MODULE__{state: state, store: store}, data) do
+    state
+    |> store.populate(build_data_stream(data))
+    |> update_state(lb)
   end
 
   def populate!(lb, data) do
-    {:ok, _} = populate(lb, build_data_stream(data))
+    {:ok, lb} = populate(lb, build_data_stream(data))
     lb
   end
 
@@ -58,48 +56,65 @@ defmodule CxLeaderboard.Leaderboard do
     lb
   end
 
-  def add(%__MODULE__{state: state, store: store}, entry) do
+  def add(lb = %__MODULE__{state: state, store: store}, entry) do
     case Entry.format(entry) do
-      error = {:error, _} -> error
-      entry -> store.add(state, entry)
+      error = {:error, _} ->
+        error
+
+      entry ->
+        state
+        |> store.add(entry)
+        |> update_state(lb)
     end
   end
 
   def add!(lb, entry) do
-    {:ok, _} = add(lb, entry)
+    {:ok, lb} = add(lb, entry)
     lb
   end
 
-  def update(%__MODULE__{state: state, store: store}, entry) do
+  def update(lb = %__MODULE__{state: state, store: store}, entry) do
     case Entry.format(entry) do
-      error = {:error, _} -> error
-      entry -> store.update(state, entry)
+      error = {:error, _} ->
+        error
+
+      entry ->
+        state
+        |> store.update(entry)
+        |> update_state(lb)
     end
   end
 
   def update!(lb, entry) do
-    {:ok, _} = update(lb, entry)
+    {:ok, lb} = update(lb, entry)
     lb
   end
 
-  def add_or_update(%__MODULE__{state: state, store: store}, entry) do
+  def add_or_update(lb = %__MODULE__{state: state, store: store}, entry) do
     case Entry.format(entry) do
-      error = {:error, _} -> error
-      entry -> store.add_or_update(state, entry)
+      error = {:error, _} ->
+        error
+
+      entry ->
+        state
+        |> store.add_or_update(entry)
+        |> update_state(lb)
     end
   end
 
   def add_or_update!(lb, entry) do
-    {:ok, _} = add_or_update(lb, entry)
+    {:ok, lb} = add_or_update(lb, entry)
     lb
   end
 
-  def remove(%__MODULE__{state: state, store: store}, entry_id) do
-    store.remove(state, entry_id)
+  def remove(lb = %__MODULE__{state: state, store: store}, entry_id) do
+    state
+    |> store.remove(entry_id)
+    |> update_state(lb)
   end
 
   def remove!(lb, entry_id) do
-    {:ok, _} = remove(lb, entry_id)
+    {:ok, lb} = remove(lb, entry_id)
     lb
   end
 
@@ -118,6 +133,9 @@ defmodule CxLeaderboard.Leaderboard do
   end
 
   ## Private
+
+  defp update_state({:ok, state}, lb), do: {:ok, Map.put(lb, :state, state)}
+  defp update_state(error, _), do: error
 
   defp build_data_stream(data) do
     data
