@@ -9,6 +9,23 @@ defmodule CxLeaderboard.Leaderboard do
 
   ## Writer functions
 
+  @doc """
+  Creates a new leaderboard.
+
+  ## Options
+
+    * `:store` - storage engine to use for the leaderboard. Supports
+      `CxLeaderboard.EtsStore` and `CxLeaderboard.TermStore`. Default:
+      `CxLeaderboard.EtsStore`.
+
+    * `:name` - sets the name identifying the leaderboard. Only needed when
+      using `CxLeaderboard.EtsStore`.
+
+  ## Examples
+
+      iex> Leaderboard.create(name: :global)
+      {:ok, %Leaderboard{state: :global, store: CxLeaderboard.EtsStore}}
+  """
   @spec create(keyword()) :: {:ok, Leaderboard.t()} | {:error, term}
   def create(kwargs \\ []) do
     store = Keyword.get(kwargs, :store, CxLeaderboard.EtsStore)

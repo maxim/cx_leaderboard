@@ -1,4 +1,5 @@
 defmodule CxLeaderboardTest do
   use ExUnit.Case
-  doctest CxLeaderboard
+  alias CxLeaderboard.Leaderboard
+  doctest Leaderboard
 end
