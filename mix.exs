@@ -7,7 +7,8 @@ defmodule CxLeaderboard.MixProject do
       version: "0.1.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
     ]
   end
 
@@ -21,7 +22,8 @@ defmodule CxLeaderboard.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:benchee, "~> 0.12", only: :dev}
+      {:dialyxir, "~> 0.5", only: :dev, runtime: false},
+      {:benchee, "~> 0.12", only: :dev, runtime: false}
     ]
   end
 end

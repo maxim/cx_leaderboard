@@ -77,13 +77,13 @@ defmodule CxLeaderboard.Storage do
   Return a correctly ordered stream of top leaderboard records that can be
   accessed all the way to the bottom.
   """
-  @callback top(Leaderboard.state()) :: Stream.t()
+  @callback top(Leaderboard.state()) :: Enumerable.t()
 
   @doc """
   Return a correctly ordered stream of bottom leaderboard records that can be
   accessed all the way to the top.
   """
-  @callback bottom(Leaderboard.state()) :: Stream.t()
+  @callback bottom(Leaderboard.state()) :: Enumerable.t()
 
   @doc """
   Show the number of records in the leaderboard.

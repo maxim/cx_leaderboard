@@ -48,7 +48,7 @@ defmodule CxLeaderboard do
     - [DONE] Implement bottom function (opposite of top)
     - [DONE] Add benchmark
     - Docs
-    - Typespecs
+    - [DONE] Typespecs
   """
 
   @doc """
