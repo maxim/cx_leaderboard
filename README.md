@@ -3,9 +3,11 @@
 A featureful, efficient leaderboard based on ets store. Supports records of any shape.
 
 ```elixir
-{:ok, board} = CxLeaderboard.create(:global)
+alias CxLeaderboard.Leaderboard
 
-board = CxLeaderboard.populate!(board, [
+{:ok, board} = Leaderboard.create(:global)
+
+board = eaderboard.populate!(board, [
   {-20, :id1},
   {-30, :id2}
 ])
@@ -21,16 +23,21 @@ records = CxLeaderboard.top(board) |> Enum.take(2)
 
 * Ranks and percentiles
 * Concurrent reads, sequential writes
-* Stream API access to top entries
-* O(1) querying of any entry by id
-* Dynamic subset leaderboards (scoping)
+* Stream API access to records from top and bottom
+* O(1) querying of any record by id
+* Adding, updating, removing, upserting of individual entries
+* Fetching a range of records around a given id (for context)
+* Pluggable data stores: ets for big boards, term for mini boards
 * Atomic rebuilds in O(2n log n) time
-* Multi-node control
+* Multi-node support
+
+## Planned features
+
+* Pluggable indexers
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `cx_leaderboard` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `cx_leaderboard` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
