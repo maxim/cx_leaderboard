@@ -124,7 +124,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
          index when not is_nil(index) <- get_meta(name, :index_table_name),
          {:ok, index_term = {_, key, _}} <- lookup(index, id),
          {:ok, table_term = {_, _}} <- lookup(table, key) do
-      build_entry(table_term, index_term)
+      build_record(table_term, index_term)
     else
       _ -> nil
     end
@@ -191,7 +191,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
     index
   end
 
-  defp build_entry({key, payload}, {_, _, stats}) do
+  defp build_record({key, payload}, {_, _, stats}) do
     {key, payload, stats}
   end
 
