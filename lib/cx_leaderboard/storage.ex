@@ -60,6 +60,20 @@ defmodule CxLeaderboard.Storage do
   @callback get(Leaderboard.state(), Entry.id()) :: Record.t() | nil
 
   @doc """
+  Return a list of records around the given id. The list should go from top to
+  bottom if the range is increasing, and from bottom to top if range decreasing.
+  Zero always corresponds to where the id is positioned.
+
+  For example:
+
+    - A range -2..1 should return (from top to bottom) 2 records prior to the
+      given id, the record at the given id, and 1 record after the given id.
+    - A range 2..-2 should return (from bottom to top) 2 records after the given
+      id, the record at the given id, and 2 records before the given id.
+  """
+  @callback range(Leaderboard.state(), Entry.id(), Range.t()) :: [Record.t()]
+
+  @doc """
   Return a correctly ordered stream of top leaderboard records that can be
   accessed all the way to the end.
   """

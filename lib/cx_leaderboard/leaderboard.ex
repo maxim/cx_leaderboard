@@ -134,6 +134,10 @@ defmodule CxLeaderboard.Leaderboard do
     store.get(state, entry_id)
   end
 
+  def range(%__MODULE__{state: state, store: store}, entry_id, range) do
+    store.range(state, entry_id, range)
+  end
+
   ## Private
 
   defp update_state({:ok, state}, lb), do: {:ok, Map.put(lb, :state, state)}

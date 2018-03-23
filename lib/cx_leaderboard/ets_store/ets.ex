@@ -130,6 +130,31 @@ defmodule CxLeaderboard.EtsStore.Ets do
     end
   end
 
+  def range(name, id, start..finish) do
+    case get(name, id) do
+      nil ->
+        []
+
+      {key, _, _} ->
+        table = get_meta(name, :entries_table_name)
+
+        {min, max} = Enum.min_max([start, finish])
+
+        start_key = key_at_offset(table, key, min)
+        finish_key = key_at_offset(table, key, max)
+
+        results =
+          table
+          |> keys_between(start_key, finish_key)
+          |> Enum.map(fn
+            {_, id} -> get(name, id)
+            {_, _, id} -> get(name, id)
+          end)
+
+        if finish < start, do: Enum.reverse(results), else: results
+    end
+  end
+
   def top(name) do
     table_name = get_meta(name, :entries_table_name)
 
@@ -149,6 +174,27 @@ defmodule CxLeaderboard.EtsStore.Ets do
   end
 
   ## Private
+
+  defp keys_between(_, key, key), do: [key]
+
+  defp keys_between(table, key1, key2) do
+    [key1 | keys_between(table, :ets.next(table, key1), key2)]
+  end
+
+  defp key_at_offset(_, key, 0), do: key
+
+  defp key_at_offset(table, key, amount) do
+    direction = if amount > 0, do: :next, else: :prev
+
+    Enum.reduce_while(0..(amount - 1), key, fn _, key ->
+      next_key = apply(:ets, direction, [table, key])
+
+      case next_key do
+        :"$end_of_table" -> {:halt, key}
+        next_key -> {:cont, next_key}
+      end
+    end)
+  end
 
   defp modify_with_reindex(name, count_delta, modification) do
     t1 = get_timestamp()

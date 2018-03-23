@@ -44,7 +44,8 @@ defmodule CxLeaderboard do
     - [DONE] Add add_or_update for more efficient upsert
     - [DONE] Add get top-level function
     - [DONE] Implement scoping by ids (this is now possible with TermStore)
-    - Implement "around" featureset
+    - [DONE] Implement "around" featureset
+    - Implement bottom function (opposite of top)
     - Implement status fetching
     - Add benchmark
     - Figure out how to reuse this library at Crossfield

@@ -208,6 +208,89 @@ defmodule CxLeaderboard.StorageCase do
         assert {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}} ==
                  Leaderboard.get(board, :id1)
       end
+
+      test "retrieves next adjacent records", %{board: board} do
+        records =
+          board
+          |> Leaderboard.populate!([
+            {-40, :id1},
+            {-30, :id2},
+            {-20, :id3},
+            {-10, :id4}
+          ])
+          |> Leaderboard.range(:id2, 0..1)
+
+        assert [
+                 {{-30, :id2}, :id2, {1, 2, 62.5, 2, 1}},
+                 {{-20, :id3}, :id3, {2, 3, 37.5, 1, 1}}
+               ] == records
+      end
+
+      test "retrieves previous adjacent records", %{board: board} do
+        records =
+          board
+          |> Leaderboard.populate!([
+            {-40, :id1},
+            {-30, :id2},
+            {-20, :id3},
+            {-10, :id4}
+          ])
+          |> Leaderboard.range(:id2, -1..0)
+
+        assert [
+                 {{-40, :id1}, :id1, {0, 1, 87.5, 3, 1}},
+                 {{-30, :id2}, :id2, {1, 2, 62.5, 2, 1}}
+               ] == records
+      end
+
+      test "retrieves an adjacent range of records", %{board: board} do
+        records =
+          board
+          |> Leaderboard.populate!([
+            {-40, :id1},
+            {-30, :id2},
+            {-20, :id3},
+            {-10, :id4}
+          ])
+          |> Leaderboard.range(:id2, -2..1)
+
+        assert [
+                 {{-40, :id1}, :id1, {0, 1, 87.5, 3, 1}},
+                 {{-30, :id2}, :id2, {1, 2, 62.5, 2, 1}},
+                 {{-20, :id3}, :id3, {2, 3, 37.5, 1, 1}}
+               ] == records
+      end
+
+      test "retrieves a range of records in reverse order", %{board: board} do
+        records =
+          board
+          |> Leaderboard.populate!([
+            {-40, :id1},
+            {-30, :id2},
+            {-20, :id3},
+            {-10, :id4}
+          ])
+          |> Leaderboard.range(:id2, 2..-1)
+
+        assert [
+                 {{-10, :id4}, :id4, {3, 4, 12.5, 0, 1}},
+                 {{-20, :id3}, :id3, {2, 3, 37.5, 1, 1}},
+                 {{-30, :id2}, :id2, {1, 2, 62.5, 2, 1}},
+                 {{-40, :id1}, :id1, {0, 1, 87.5, 3, 1}}
+               ] == records
+      end
+
+      test "retrieves an empty list if id is not found", %{board: board} do
+        records =
+          board
+          |> Leaderboard.populate!([
+            {-40, :id1},
+            {-30, :id2}
+          ])
+          |> Leaderboard.range(:id3, -2..1)
+
+        assert [] == records
+      end
     end
   end
 end

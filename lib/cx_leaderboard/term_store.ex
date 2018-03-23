@@ -64,6 +64,33 @@ defmodule CxLeaderboard.TermStore do
     end
   end
 
+  def range(lb = %{table: table}, id, start..finish) do
+    case get(lb, id) do
+      nil ->
+        []
+
+      {key, _, _} ->
+        key_index =
+          table
+          |> Enum.find_index(fn
+            {^key, _} -> true
+            _ -> false
+          end)
+
+        {min, max} = Enum.min_max([start, finish])
+
+        min_index = Enum.max([key_index + min, 0])
+        max_index = Enum.max([key_index + max, 0])
+
+        slice =
+          table
+          |> Enum.slice(min_index..max_index)
+          |> Enum.map(fn entry -> get(lb, Entry.get_id(entry)) end)
+
+        if finish < start, do: Enum.reverse(slice), else: slice
+    end
+  end
+
   def top(state = %{table: table}) do
     table
     |> Stream.map(fn entry ->
