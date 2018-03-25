@@ -57,7 +57,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
         end)
 
       _ ->
-        {:error, :key_not_found}
+        {:error, :entry_not_found}
     end
   end
 
@@ -66,7 +66,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
 
     case get(name, id) do
       nil ->
-        {:error, :key_not_found}
+        {:error, :entry_not_found}
 
       {key, _, _} ->
         modify_with_reindex(name, 0, fn table ->
@@ -200,7 +200,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
   defp key_at_offset(table, key, amount) do
     direction = if amount > 0, do: :next, else: :prev
 
-    Enum.reduce_while(0..(amount - 1), key, fn _, key ->
+    Enum.reduce_while(0..(abs(amount) - 1), key, fn _, key ->
       next_key = apply(:ets, direction, [table, key])
 
       case next_key do

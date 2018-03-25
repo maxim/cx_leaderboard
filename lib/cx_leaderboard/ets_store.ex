@@ -61,16 +61,40 @@ defmodule CxLeaderboard.EtsStore do
     |> format_multi_call_reply(name)
   end
 
-  defp format_multi_call_reply(replies = {nodes, []}, name) do
-    if Enum.any?(nodes, fn
-         {_, {:error, _}} -> true
-         _ -> false
-       end) do
-      {:error, replies}
-    else
-      {:ok, name}
+  defp format_multi_call_reply(replies = {nodes, bad_nodes}, name) do
+    errors = collect_errors(replies)
+    node_count = Enum.count(nodes) + Enum.count(bad_nodes)
+
+    case {node_count, errors} do
+      # no errors anywhere
+      {_, []} ->
+        {:ok, name}
+
+      # only one node and one error, collapse to a simple error
+      {1, [{_, reason}]} ->
+        {:error, reason}
+
+      # only one node but multiple errors, return all reasons in a list
+      {1, errors} ->
+        {:error, Enum.map(errors, fn {_, reason} -> reason end)}
+
+      # multiple nodes and errors, return node-error pairs
+      {_, errors} ->
+        {:error, errors}
     end
   end
 
-  defp format_multi_call_reply(replies, _), do: {:error, replies}
+  defp collect_errors({nodes, bad_nodes}) do
+    errors =
+      nodes
+      |> Enum.filter(&reply_has_errors?/1)
+      |> Enum.map(fn {node, {:error, reason}} -> {node, reason} end)
+
+    Enum.reduce(bad_nodes, errors, fn bad_node, errors ->
+      [{bad_node, :bad_node} | errors]
+    end)
+  end
+
+  defp reply_has_errors?({_, {:error, _}}), do: true
+  defp reply_has_errors?(_), do: false
 end
