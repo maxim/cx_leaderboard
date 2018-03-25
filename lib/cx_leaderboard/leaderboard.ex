@@ -436,20 +436,20 @@ defmodule CxLeaderboard.Leaderboard do
       ...>   {-2, :id3},
       ...>   {-1, :id4}
       ...> ])
-      iex> Leaderboard.range(board, :id3, -1..0)
+      iex> Leaderboard.get(board, :id3, -1..0)
       [
         {{-3, :id2}, :id2, {1, 2, 62.5, 2, 1}},
         {{-2, :id3}, :id3, {2, 3, 37.5, 1, 1}}
       ]
-      iex> Leaderboard.range(board, :id3, 0..-1)
+      iex> Leaderboard.get(board, :id3, 0..-1)
       [
         {{-2, :id3}, :id3, {2, 3, 37.5, 1, 1}},
         {{-3, :id2}, :id2, {1, 2, 62.5, 2, 1}}
       ]
   """
-  @spec range(Leaderboard.t(), Entry.id(), Range.t()) :: [Record.t()]
-  def range(%__MODULE__{state: state, store: store}, entry_id, range) do
-    store.range(state, entry_id, range)
+  @spec get(Leaderboard.t(), Entry.id(), Range.t()) :: [Record.t()]
+  def get(%__MODULE__{state: state, store: store}, entry_id, range) do
+    store.get(state, entry_id, range)
   end
 
   ## Private

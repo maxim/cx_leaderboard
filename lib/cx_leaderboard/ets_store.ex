@@ -48,10 +48,10 @@ defmodule CxLeaderboard.EtsStore do
   ## Readers
 
   defdelegate get(name, id), to: Ets
+  defdelegate get(name, id, range), to: Ets
   defdelegate top(name), to: Ets
   defdelegate bottom(name), to: Ets
   defdelegate count(name), to: Ets
-  defdelegate range(name, id, range), to: Ets
 
   ## Private
 

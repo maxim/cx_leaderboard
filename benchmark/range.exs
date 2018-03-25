@@ -16,6 +16,6 @@ term_board =
   |> Leaderboard.populate!(one_mil)
 
 Benchee.run(%{
-  "ets" => fn -> Leaderboard.range(ets_board, 500_000, -10..10) end,
-  "term" => fn -> Leaderboard.range(term_board, 500_000, -10..10) end
+  "ets" => fn -> Leaderboard.get(ets_board, 500_000, -10..10) end,
+  "term" => fn -> Leaderboard.get(term_board, 500_000, -10..10) end
 })

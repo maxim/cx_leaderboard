@@ -78,7 +78,7 @@ defmodule CxLeaderboard.TermStore do
     end
   end
 
-  def range(lb = %{table: table}, id, start..finish) do
+  def get(lb = %{table: table}, id, start..finish) do
     case get(lb, id) do
       nil ->
         []

@@ -130,7 +130,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
     end
   end
 
-  def range(name, id, start..finish) do
+  def get(name, id, start..finish) do
     case get(name, id) do
       nil ->
         []

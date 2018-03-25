@@ -251,7 +251,7 @@ defmodule CxLeaderboard.StorageCase do
             {-20, :id3},
             {-10, :id4}
           ])
-          |> Leaderboard.range(:id2, 0..1)
+          |> Leaderboard.get(:id2, 0..1)
 
         assert [
                  {{-30, :id2}, :id2, {1, 2, 62.5, 2, 1}},
@@ -268,7 +268,7 @@ defmodule CxLeaderboard.StorageCase do
             {-20, :id3},
             {-10, :id4}
           ])
-          |> Leaderboard.range(:id2, -1..0)
+          |> Leaderboard.get(:id2, -1..0)
 
         assert [
                  {{-40, :id1}, :id1, {0, 1, 87.5, 3, 1}},
@@ -285,7 +285,7 @@ defmodule CxLeaderboard.StorageCase do
             {-20, :id3},
             {-10, :id4}
           ])
-          |> Leaderboard.range(:id2, -2..1)
+          |> Leaderboard.get(:id2, -2..1)
 
         assert [
                  {{-40, :id1}, :id1, {0, 1, 87.5, 3, 1}},
@@ -303,7 +303,7 @@ defmodule CxLeaderboard.StorageCase do
             {-20, :id3},
             {-10, :id4}
           ])
-          |> Leaderboard.range(:id2, 2..-1)
+          |> Leaderboard.get(:id2, 2..-1)
 
         assert [
                  {{-10, :id4}, :id4, {3, 4, 12.5, 0, 1}},
@@ -320,7 +320,7 @@ defmodule CxLeaderboard.StorageCase do
             {-40, :id1},
             {-30, :id2}
           ])
-          |> Leaderboard.range(:id3, -2..1)
+          |> Leaderboard.get(:id3, -2..1)
 
         assert [] == records
       end

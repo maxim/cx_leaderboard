@@ -71,7 +71,7 @@ defmodule CxLeaderboard.Storage do
     - A range 2..-2 should return (from bottom to top) 2 records after the given
       id, the record at the given id, and 2 records before the given id.
   """
-  @callback range(Leaderboard.state(), Entry.id(), Range.t()) :: [Record.t()]
+  @callback get(Leaderboard.state(), Entry.id(), Range.t()) :: [Record.t()]
 
   @doc """
   Return a correctly ordered stream of top leaderboard records that can be
