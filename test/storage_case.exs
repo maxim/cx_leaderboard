@@ -100,6 +100,13 @@ defmodule CxLeaderboard.StorageCase do
                ] == top
       end
 
+      test "errors on adding a duplicate id", %{board: board} do
+        assert {:error, :entry_already_exists} ==
+                 board
+                 |> Leaderboard.add!({1, :id1})
+                 |> Leaderboard.add({1, :id1})
+      end
+
       test "supports adding individual entries when empty", %{board: board} do
         top =
           board
@@ -142,6 +149,11 @@ defmodule CxLeaderboard.StorageCase do
                ] == top
       end
 
+      test "errors on updating a missing id", %{board: board} do
+        assert {:error, :entry_not_found} ==
+                 Leaderboard.update(board, {1, :id1})
+      end
+
       test "supports removing individual entries", %{board: board} do
         top =
           board
@@ -153,6 +165,11 @@ defmodule CxLeaderboard.StorageCase do
         assert [
                  {{-30, :id2}, :id2, {0, 1, 50.0, 0, 1}}
                ] == top
+      end
+
+      test "errors on removing a missing id", %{board: board} do
+        assert {:error, :entry_not_found} ==
+                 Leaderboard.remove(board, :missing_id)
       end
 
       test "supports atomic add via add_or_update", %{board: board} do

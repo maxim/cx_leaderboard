@@ -23,25 +23,40 @@ defmodule CxLeaderboard.TermStore do
     raise "Not implemented"
   end
 
-  def add(%{table: table}, entry) do
-    table = Enum.sort([entry | table])
-    index = build_index(table)
-    {:ok, %{table: table, index: index}}
-  end
-
-  def remove(%{table: table, index: index}, id) do
-    {_, key, _} = index[id]
-    table = List.keydelete(table, key, 0)
-    index = build_index(table)
-    {:ok, %{table: table, index: index}}
-  end
-
-  def update(%{table: table, index: index}, entry) do
+  def add(lb = %{table: table}, entry) do
     id = Entry.get_id(entry)
-    {_, key, _} = index[id]
-    table = Enum.sort([entry | List.keydelete(table, key, 0)])
-    index = build_index(table)
-    {:ok, %{table: table, index: index}}
+
+    if get(lb, id) do
+      {:error, :entry_already_exists}
+    else
+      table = Enum.sort([entry | table])
+      index = build_index(table)
+      {:ok, %{table: table, index: index}}
+    end
+  end
+
+  def remove(lb = %{table: table, index: index}, id) do
+    if get(lb, id) do
+      {_, key, _} = index[id]
+      table = List.keydelete(table, key, 0)
+      index = build_index(table)
+      {:ok, %{table: table, index: index}}
+    else
+      {:error, :entry_not_found}
+    end
+  end
+
+  def update(lb = %{table: table, index: index}, entry) do
+    id = Entry.get_id(entry)
+
+    if get(lb, id) do
+      {_, key, _} = index[id]
+      table = Enum.sort([entry | List.keydelete(table, key, 0)])
+      index = build_index(table)
+      {:ok, %{table: table, index: index}}
+    else
+      {:error, :entry_not_found}
+    end
   end
 
   def add_or_update(state, entry) do
