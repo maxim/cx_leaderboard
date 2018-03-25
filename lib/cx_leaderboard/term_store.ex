@@ -6,24 +6,21 @@ defmodule CxLeaderboard.TermStore do
   ## Writers
 
   def create(_) do
-    {:ok, %{table: [], index: %{}}}
+    {:ok, %{table: [], index: %{}, count: 0}}
   end
 
   def clear(_) do
-    {:ok, %{table: [], index: %{}}}
+    {:ok, %{table: [], index: %{}, count: 0}}
   end
 
   def populate(_, data) do
     table = Enum.sort(data)
     index = build_index(table)
-    {:ok, %{table: table, index: index}}
+    count = Enum.count(data)
+    {:ok, %{table: table, index: index, count: count}}
   end
 
-  def async_populate(_, _) do
-    raise "Not implemented"
-  end
-
-  def add(lb = %{table: table}, entry) do
+  def add(lb = %{table: table, count: count}, entry) do
     id = Entry.get_id(entry)
 
     if get(lb, id) do
@@ -31,16 +28,18 @@ defmodule CxLeaderboard.TermStore do
     else
       table = Enum.sort([entry | table])
       index = build_index(table)
-      {:ok, %{table: table, index: index}}
+      count = count + 1
+      {:ok, %{table: table, index: index, count: count}}
     end
   end
 
-  def remove(lb = %{table: table, index: index}, id) do
+  def remove(lb = %{table: table, index: index, count: count}, id) do
     if get(lb, id) do
       {_, key, _} = index[id]
       table = List.keydelete(table, key, 0)
       index = build_index(table)
-      {:ok, %{table: table, index: index}}
+      count = count - 1
+      {:ok, %{table: table, index: index, count: count}}
     else
       {:error, :entry_not_found}
     end
@@ -123,8 +122,8 @@ defmodule CxLeaderboard.TermStore do
     end)
   end
 
-  def count(%{table: table}) do
-    Enum.count(table)
+  def count(%{count: count}) do
+    count
   end
 
   ## Private
