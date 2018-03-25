@@ -8,7 +8,8 @@ defmodule CxLeaderboard.MixProject do
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
+      dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]],
+      docs: [main: "CxLeaderboard.Leaderboard", extras: ["README.md"]]
     ]
   end
 
