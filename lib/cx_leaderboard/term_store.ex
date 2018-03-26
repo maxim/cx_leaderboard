@@ -13,57 +13,69 @@ defmodule CxLeaderboard.TermStore do
     {:ok, %{table: [], index: %{}, count: 0}}
   end
 
-  def populate(_, data) do
+  def populate(_, data, indexer) do
     table = Enum.sort(data)
-    index = build_index(table)
     count = Enum.count(data)
+    index = build_index(table, count, indexer)
     {:ok, %{table: table, index: index, count: count}}
   end
 
-  def add(lb = %{table: table, count: count}, entry) do
+  def add(state = %{table: table, count: count}, entry, indexer) do
     id = Entry.get_id(entry)
 
-    if get(lb, id) do
+    if get(state, id) do
       {:error, :entry_already_exists}
     else
       table = Enum.sort([entry | table])
-      index = build_index(table)
       count = count + 1
+      index = build_index(table, count, indexer)
       {:ok, %{table: table, index: index, count: count}}
     end
   end
 
-  def remove(lb = %{table: table, index: index, count: count}, id) do
-    if get(lb, id) do
+  def remove(
+        state = %{
+          table: table,
+          index: index,
+          count: count
+        },
+        id,
+        indexer
+      ) do
+    if get(state, id) do
       {_, key, _} = index[id]
       table = List.keydelete(table, key, 0)
-      index = build_index(table)
       count = count - 1
+      index = build_index(table, count, indexer)
       {:ok, %{table: table, index: index, count: count}}
     else
       {:error, :entry_not_found}
     end
   end
 
-  def update(lb = %{table: table, index: index}, entry) do
+  def update(
+        state = %{table: table, index: index, count: count},
+        entry,
+        indexer
+      ) do
     id = Entry.get_id(entry)
 
-    if get(lb, id) do
+    if get(state, id) do
       {_, key, _} = index[id]
       table = Enum.sort([entry | List.keydelete(table, key, 0)])
-      index = build_index(table)
+      index = build_index(table, count, indexer)
       {:ok, %{table: table, index: index}}
     else
       {:error, :entry_not_found}
     end
   end
 
-  def add_or_update(state, entry) do
+  def add_or_update(state, entry, indexer) do
     id = Entry.get_id(entry)
 
     case get(state, id) do
-      nil -> add(state, entry)
-      _ -> update(state, entry)
+      nil -> add(state, entry, indexer)
+      _ -> update(state, entry, indexer)
     end
   end
 
@@ -78,8 +90,8 @@ defmodule CxLeaderboard.TermStore do
     end
   end
 
-  def get(lb = %{table: table}, id, start..finish) do
-    case get(lb, id) do
+  def get(state = %{table: table}, id, start..finish) do
+    case get(state, id) do
       nil ->
         []
 
@@ -99,7 +111,7 @@ defmodule CxLeaderboard.TermStore do
         slice =
           table
           |> Enum.slice(min_index..max_index)
-          |> Enum.map(fn entry -> get(lb, Entry.get_id(entry)) end)
+          |> Enum.map(fn entry -> get(state, Entry.get_id(entry)) end)
 
         if finish < start, do: Enum.reverse(slice), else: slice
     end
@@ -128,10 +140,10 @@ defmodule CxLeaderboard.TermStore do
 
   ## Private
 
-  defp build_index(table) do
+  defp build_index(table, count, indexer) do
     table
     |> Stream.map(fn {key, _} -> key end)
-    |> Indexer.index()
+    |> Indexer.index(count, indexer)
     |> Stream.map(fn term = {id, _, _} -> {id, term} end)
     |> Enum.into(%{})
   end

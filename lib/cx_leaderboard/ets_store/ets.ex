@@ -35,12 +35,12 @@ defmodule CxLeaderboard.EtsStore.Ets do
     {:ok, name}
   end
 
-  def add(name, entry) do
+  def add(name, entry, indexer) do
     id = Entry.get_id(entry)
 
     case get(name, id) do
       nil ->
-        modify_with_reindex(name, +1, fn table ->
+        modify_with_reindex(indexer, name, +1, fn table ->
           :ets.insert(table, entry)
         end)
 
@@ -49,10 +49,10 @@ defmodule CxLeaderboard.EtsStore.Ets do
     end
   end
 
-  def remove(name, id) do
+  def remove(name, id, indexer) do
     case get(name, id) do
       {key, _, _} ->
-        modify_with_reindex(name, -1, fn table ->
+        modify_with_reindex(indexer, name, -1, fn table ->
           :ets.delete(table, key)
         end)
 
@@ -61,7 +61,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
     end
   end
 
-  def update(name, entry) do
+  def update(name, entry, indexer) do
     id = Entry.get_id(entry)
 
     case get(name, id) do
@@ -69,31 +69,31 @@ defmodule CxLeaderboard.EtsStore.Ets do
         {:error, :entry_not_found}
 
       {key, _, _} ->
-        modify_with_reindex(name, 0, fn table ->
+        modify_with_reindex(indexer, name, 0, fn table ->
           :ets.delete(table, key)
           :ets.insert(table, entry)
         end)
     end
   end
 
-  def add_or_update(name, entry) do
+  def add_or_update(name, entry, indexer) do
     id = Entry.get_id(entry)
 
     case get(name, id) do
       nil ->
-        modify_with_reindex(name, +1, fn table ->
+        modify_with_reindex(indexer, name, +1, fn table ->
           :ets.insert(table, entry)
         end)
 
       {key, _, _} ->
-        modify_with_reindex(name, 0, fn table ->
+        modify_with_reindex(indexer, name, 0, fn table ->
           :ets.delete(table, key)
           :ets.insert(table, entry)
         end)
     end
   end
 
-  def populate(name, data) do
+  def populate(name, data, indexer) do
     t1 = get_timestamp()
     set_meta(name, {:status, :populating})
 
@@ -103,7 +103,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
     suffix = get_rand_suffix()
 
     {new_table, count} = insert_entries(name, data, suffix)
-    new_index = build_index(name, new_table, count, suffix)
+    new_index = build_index(indexer, name, new_table, count, suffix)
 
     set_meta(name, [
       {:entries_table_name, new_table},
@@ -210,7 +210,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
     end)
   end
 
-  defp modify_with_reindex(name, count_delta, modification) do
+  defp modify_with_reindex(indexer, name, count_delta, modification) do
     t1 = get_timestamp()
     set_meta(name, {:status, :reindexing})
 
@@ -220,7 +220,7 @@ defmodule CxLeaderboard.EtsStore.Ets do
 
     modification.(table)
 
-    new_index = build_index(name, table, new_count)
+    new_index = build_index(indexer, name, table, new_count)
 
     set_meta(name, [
       {:index_table_name, new_index},
@@ -240,12 +240,12 @@ defmodule CxLeaderboard.EtsStore.Ets do
     {table, count}
   end
 
-  defp build_index(name, table, count, suffix \\ get_rand_suffix()) do
+  defp build_index(indexer, name, table, count, suffix \\ get_rand_suffix()) do
     index = create_index_table(name, suffix)
 
     table
     |> stream_keys()
-    |> Indexer.index(count)
+    |> Indexer.index(count, indexer)
     |> Enum.each(&:ets.insert(index, &1))
 
     index

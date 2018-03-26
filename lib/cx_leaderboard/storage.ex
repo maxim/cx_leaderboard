@@ -1,5 +1,5 @@
 defmodule CxLeaderboard.Storage do
-  alias CxLeaderboard.{Leaderboard, Entry, Record}
+  alias CxLeaderboard.{Leaderboard, Entry, Record, Indexer}
 
   @doc """
   Create a leaderboard in your storage identified with the provided atom.
@@ -16,42 +16,42 @@ defmodule CxLeaderboard.Storage do
   Replace all data in the leaderboard with the data in the provided stream.
   Block until completed.
   """
-  @callback populate(Leaderboard.state(), Enumerable.t()) ::
+  @callback populate(Leaderboard.state(), Enumerable.t(), Indexer.t()) ::
               {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Replace all data in the leaderboard with the data in the provided stream.
   Return immediately, perform most of the work asynchronously.
   """
-  @callback async_populate(Leaderboard.state(), Enumerable.t()) ::
+  @callback async_populate(Leaderboard.state(), Enumerable.t(), Indexer.t()) ::
               {:ok, term} | {:error, term}
 
   @doc """
   Add a single entry to the leaderboard. Return an error if the entry is already
   in the leaderboard. The operation should be blocking.
   """
-  @callback add(Leaderboard.state(), Entry.t()) ::
+  @callback add(Leaderboard.state(), Entry.t(), Indexer.t()) ::
               {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Remove a single entry from the leaderboard based on its id. Return an error if
   the id does not exist. The operation should be blocking.
   """
-  @callback remove(Leaderboard.state(), Entry.id()) ::
+  @callback remove(Leaderboard.state(), Entry.id(), Indexer.t()) ::
               {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Update a single entry in the leaderboard. Return an error if the entry is not
   found in the leaderboard. The operation should be blocking.
   """
-  @callback update(Leaderboard.state(), Entry.t()) ::
+  @callback update(Leaderboard.state(), Entry.t(), Indexer.t()) ::
               {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
   Atomically insert an entry, or update it if its id already exists in the
   leaderboard.
   """
-  @callback add_or_update(Leaderboard.state(), Entry.t()) ::
+  @callback add_or_update(Leaderboard.state(), Entry.t(), Indexer.t()) ::
               {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
@@ -90,5 +90,5 @@ defmodule CxLeaderboard.Storage do
   """
   @callback count(Leaderboard.state()) :: non_neg_integer
 
-  @optional_callbacks async_populate: 2
+  @optional_callbacks async_populate: 3
 end

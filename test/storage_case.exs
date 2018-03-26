@@ -1,6 +1,7 @@
 defmodule CxLeaderboard.StorageCase do
   use ExUnit.CaseTemplate
-  alias CxLeaderboard.Leaderboard
+  alias CxLeaderboard.{Leaderboard, Indexer}
+  alias CxLeaderboard.Indexer.Stats
 
   using do
     quote location: :keep do
@@ -323,6 +324,33 @@ defmodule CxLeaderboard.StorageCase do
           |> Leaderboard.get(:id3, -2..1)
 
         assert [] == records
+      end
+
+      test "supports custom indexer", %{board: board} do
+        custom_indexer = %Indexer{
+          on_rank: &Stats.sequential_rank_less_than_percentile/1,
+          on_entry: fn {i, _, _, _} -> i * 2 end
+        }
+
+        board = Map.put(board, :indexer, custom_indexer)
+
+        records =
+          board
+          |> Leaderboard.populate!([
+            {-40, :id1},
+            {-30, :id2},
+            {-20, :id3},
+            {-10, :id4}
+          ])
+          |> Leaderboard.top()
+          |> Enum.to_list()
+
+        assert [
+                 {{-40, :id1}, :id1, {0, {1, 75.0}}},
+                 {{-30, :id2}, :id2, {2, {2, 50.0}}},
+                 {{-20, :id3}, :id3, {4, {3, 25.0}}},
+                 {{-10, :id4}, :id4, {6, {4, 0.0}}}
+               ] == records
       end
     end
   end

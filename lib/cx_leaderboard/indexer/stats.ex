@@ -1,12 +1,11 @@
 defmodule CxLeaderboard.Indexer.Stats do
   @moduledoc """
-  This module is full of functions that can be swapped into the indexer. Each
+  This module is full of functions that can be used in a custom indexer. Each
   uses a different way of calculating stats. Do you want your ranks to go
   sequentially, like `1, 1, 2`? Then choose one of the `sequential_rank_*`
   functions. Want them offset instead, like `1, 1, 3`? Choose one of the
   `offset_rank_*` functions. If there is something else you want to do that
-  isn't available here, you are welcome to plug in your own function into the
-  indexer.
+  isn't available here, you are welcome to implement your own function.
 
   Most of the functions here are meant to be given as `on_rank` callback. See
   description of each function to find out whether it's intended for `on_rank`

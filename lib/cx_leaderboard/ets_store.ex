@@ -20,29 +20,29 @@ defmodule CxLeaderboard.EtsStore do
     end
   end
 
-  def populate(name, data) do
-    process_multi_call(name, {:populate, data})
+  def populate(name, data, indexer) do
+    process_multi_call(name, {:populate, data, indexer})
   end
 
-  def async_populate(name, data) do
-    :abcast = GenServer.abcast(name, {:populate, data})
+  def async_populate(name, data, indexer) do
+    :abcast = GenServer.abcast(name, {:populate, data, indexer})
     {:ok, name}
   end
 
-  def add(name, entry) do
-    process_multi_call(name, {:add, entry})
+  def add(name, entry, indexer) do
+    process_multi_call(name, {:add, entry, indexer})
   end
 
-  def remove(name, id) do
-    process_multi_call(name, {:remove, id})
+  def remove(name, id, indexer) do
+    process_multi_call(name, {:remove, id, indexer})
   end
 
-  def update(name, entry) do
-    process_multi_call(name, {:update, entry})
+  def update(name, entry, indexer) do
+    process_multi_call(name, {:update, entry, indexer})
   end
 
-  def add_or_update(name, entry) do
-    process_multi_call(name, {:add_or_update, entry})
+  def add_or_update(name, entry, indexer) do
+    process_multi_call(name, {:add_or_update, entry, indexer})
   end
 
   ## Readers

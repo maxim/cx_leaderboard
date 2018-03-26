@@ -45,31 +45,29 @@ defmodule CxLeaderboard.Leaderboard do
   A record is what you get back when querying the leaderboard. It contains both
   your entry, and calculated stats. Here's what it looks like:
 
-      {{score, id}, payload, stats} # without tiebreaker
-      {{score, tiebreaker, id}, payload, stats} # with tiebreaker
+      # without tiebreaker
+      {{score, id}, payload, {index,       {rank, percentile}}}
+      #\___key___/ \payload/  \entry stats/\___rank stats___/
+
+      # with tiebreaker
+      {{score, tiebreaker, id}, payload, {index,       {rank, percentile}}}
+      # \________key_________/ \payload/  \entry stats/\___rank stats___/
 
   ## Stats
 
-  The stats is a tuple with the following fields (in their respective order):
-
-    * `index` - zero-based position of the record in the leaderboard, where 0 is
-      the top.
-    * `rank` - rank of the score in the leaderboard, where 1 is the top rank.
-      Ranks are offset by the number of records possessing them. E.g.: if 2
-      entries have rank 1, then the next record will have rank 3.
-    * `percentile` - what percent of records have lower score than this one.
-    * `lower_scores_count` - how many records have lower scores than this one.
-    * `frequency` - how many records have the same score as this one.
-
+  By default the stats you get are index, rank, and percentile. However, passing
+  a custom indexer into the `create/1` function allows you to calculate your own
+  stats. To learn more about indexer customization read the module docs of
+  `CxLeaderboard.Indexer`.
   """
 
-  @enforce_keys [:state, :store]
-  defstruct [:state, :store]
+  @enforce_keys [:state, :store, :indexer]
+  defstruct [:state, :store, :indexer]
 
-  @type t :: %__MODULE__{state: state(), store: module()}
+  alias CxLeaderboard.{Leaderboard, Entry, Record, Indexer}
+
+  @type t :: %__MODULE__{state: state(), store: module(), indexer: Indexer.t()}
   @type state :: term
-
-  alias CxLeaderboard.{Leaderboard, Entry, Record}
 
   ## Writer functions
 
@@ -82,21 +80,33 @@ defmodule CxLeaderboard.Leaderboard do
       `CxLeaderboard.EtsStore` and `CxLeaderboard.TermStore`. Default:
       `CxLeaderboard.EtsStore`.
 
+    * `:indexer` - indexer to use for stats calculation. The default indexer
+      calculates rank with offsets (e.g. 1,1,3) and percentile based on same-or-
+      lower scores, within 1-99 range. Learn more about making custom indexers
+      in `CxLeaderboard.Indexer` module doc.
+
     * `:name` - sets the name identifying the leaderboard. Only needed when
       using `CxLeaderboard.EtsStore`.
 
   ## Examples
 
       iex> Leaderboard.create(name: :global)
-      {:ok, %Leaderboard{state: :global, store: CxLeaderboard.EtsStore}}
+      {:ok,
+        %Leaderboard{
+          state: :global,
+          store: CxLeaderboard.EtsStore,
+          indexer: %CxLeaderboard.Indexer{}
+        }
+      }
   """
   @spec create(keyword()) :: {:ok, Leaderboard.t()} | {:error, term}
   def create(kwargs \\ []) do
     store = Keyword.get(kwargs, :store, CxLeaderboard.EtsStore)
+    indexer = Keyword.get(kwargs, :indexer, %Indexer{})
 
     case store.create(kwargs) do
       {:ok, state} ->
-        {:ok, %__MODULE__{state: state, store: store}}
+        {:ok, %__MODULE__{state: state, store: store, indexer: indexer}}
 
       error ->
         error
@@ -155,9 +165,12 @@ defmodule CxLeaderboard.Leaderboard do
   """
   @spec populate(Leaderboard.t(), Enumerable.t()) ::
           {:ok, Leaderboard.t()} | {:error, term}
-  def populate(lb = %__MODULE__{state: state, store: store}, data) do
+  def populate(
+        lb = %__MODULE__{state: state, store: store, indexer: indexer},
+        data
+      ) do
     state
-    |> store.populate(build_data_stream(data))
+    |> store.populate(build_data_stream(data), indexer)
     |> update_state(lb)
   end
 
@@ -191,9 +204,12 @@ defmodule CxLeaderboard.Leaderboard do
   """
   @spec async_populate(Leaderboard.t(), Enumerable.t()) ::
           {:ok, Leaderboard.t()} | {:error, term}
-  def async_populate(lb = %__MODULE__{state: state, store: store}, data) do
+  def async_populate(
+        lb = %__MODULE__{state: state, store: store, indexer: indexer},
+        data
+      ) do
     state
-    |> store.async_populate(build_data_stream(data))
+    |> store.async_populate(build_data_stream(data), indexer)
     |> update_state(lb)
   end
 
@@ -225,14 +241,17 @@ defmodule CxLeaderboard.Leaderboard do
   """
   @spec add(Leaderboard.t(), Entry.t()) ::
           {:ok, Leaderboard.t()} | {:error, term}
-  def add(lb = %__MODULE__{state: state, store: store}, entry) do
+  def add(
+        lb = %__MODULE__{state: state, store: store, indexer: indexer},
+        entry
+      ) do
     case Entry.format(entry) do
       error = {:error, _} ->
         error
 
       entry ->
         state
-        |> store.add(entry)
+        |> store.add(entry, indexer)
         |> update_state(lb)
     end
   end
@@ -264,14 +283,17 @@ defmodule CxLeaderboard.Leaderboard do
   """
   @spec update(Leaderboard.t(), Entry.t()) ::
           {:ok, Leaderboard.t()} | {:error, term}
-  def update(lb = %__MODULE__{state: state, store: store}, entry) do
+  def update(
+        lb = %__MODULE__{state: state, store: store, indexer: indexer},
+        entry
+      ) do
     case Entry.format(entry) do
       error = {:error, _} ->
         error
 
       entry ->
         state
-        |> store.update(entry)
+        |> store.update(entry, indexer)
         |> update_state(lb)
     end
   end
@@ -303,14 +325,17 @@ defmodule CxLeaderboard.Leaderboard do
   """
   @spec add_or_update(Leaderboard.t(), Entry.t()) ::
           {:ok, Leaderboard.t()} | {:error, term}
-  def add_or_update(lb = %__MODULE__{state: state, store: store}, entry) do
+  def add_or_update(
+        lb = %__MODULE__{state: state, store: store, indexer: indexer},
+        entry
+      ) do
     case Entry.format(entry) do
       error = {:error, _} ->
         error
 
       entry ->
         state
-        |> store.add_or_update(entry)
+        |> store.add_or_update(entry, indexer)
         |> update_state(lb)
     end
   end
@@ -340,9 +365,12 @@ defmodule CxLeaderboard.Leaderboard do
   """
   @spec remove(Leaderboard.t(), Entry.id()) ::
           {:ok, Leaderboard.t()} | {:error, term}
-  def remove(lb = %__MODULE__{state: state, store: store}, entry_id) do
+  def remove(
+        lb = %__MODULE__{state: state, store: store, indexer: indexer},
+        entry_id
+      ) do
     state
-    |> store.remove(entry_id)
+    |> store.remove(entry_id, indexer)
     |> update_state(lb)
   end
 

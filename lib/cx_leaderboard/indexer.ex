@@ -3,7 +3,8 @@ defmodule CxLeaderboard.Indexer do
   Indexer walks the entire leaderboard and calculates the needed stats, such as
   rank and percentile.
 
-  You can customize the stats by passing 2 callbacks into the index function:
+  You can customize the stats by creating a custom indexer — a struct consisting
+  of 2 callback functions:
 
     - `on_rank` is called when the indexer finishes scanning a set of equal
       scores, and moves onto a lower score
@@ -74,44 +75,59 @@ defmodule CxLeaderboard.Indexer do
   """
 
   alias CxLeaderboard.Indexer.Stats
+  alias CxLeaderboard.Entry
+
+  defstruct on_rank: &Stats.offset_rank_1_99_less_or_equal_percentile/1,
+            on_entry: &Stats.global_index/1
+
+  @type t :: %__MODULE__{
+          on_rank: Indexer.on_rank(),
+          on_entry: Indexer.on_entry()
+        }
+
+  @type on_rank ::
+          ({
+             non_neg_integer,
+             non_neg_integer,
+             non_neg_integer,
+             non_neg_integer
+           } ->
+             term)
+
+  @type on_entry :: ({non_neg_integer, term, Entry.key(), term} -> term)
 
   def index(keys) do
-    index(keys, Enum.count(keys), nil, nil)
+    index(keys, Enum.count(keys))
   end
 
   def index(keys, cnt) do
-    index(keys, cnt, nil, nil)
+    index(keys, cnt, %__MODULE__{})
   end
 
-  def index(_, 0, _, _), do: []
+  def index(_, 0, _), do: []
 
-  def index(keys, cnt, on_rank, on_entry) do
-    on_rank = on_rank || &Stats.offset_rank_1_99_less_or_equal_percentile/1
-    on_entry = on_entry || &Stats.global_index/1
-
+  def index(keys, cnt, indexer) do
     keys
     |> Stream.chunk_while(
-      {on_rank, on_entry, cnt},
+      {indexer, cnt},
       &rank_split/2,
       &rank_done/1
     )
     |> Stream.concat()
   end
 
-  defp rank_split(key, {on_rank, on_entry, cnt}) do
-    {:cont, {on_rank, on_entry, cnt, 0, 0, 1, [{key, 0}]}}
+  defp rank_split(key, {indexer, cnt}) do
+    {:cont, {indexer, cnt, 0, 0, 1, [{key, 0}]}}
   end
 
   defp rank_split(
          key,
-         acc = {on_rank, on_entry, cnt, c_i, c_pos, c_size, buf = [{_, i} | _]}
+         acc = {indexer, cnt, c_i, c_pos, c_size, buf = [{_, i} | _]}
        ) do
     if score_changed?(key, buf) do
-      {:cont, flush(acc),
-       {on_rank, on_entry, cnt, c_i + 1, i + 1, 1, [{key, i + 1}]}}
+      {:cont, flush(acc), {indexer, cnt, c_i + 1, i + 1, 1, [{key, i + 1}]}}
     else
-      {:cont,
-       {on_rank, on_entry, cnt, c_i, c_pos, c_size + 1, [{key, i + 1} | buf]}}
+      {:cont, {indexer, cnt, c_i, c_pos, c_size + 1, [{key, i + 1} | buf]}}
     end
   end
 
@@ -124,15 +140,15 @@ defmodule CxLeaderboard.Indexer do
   defp score_changed?({score, _}, [{{score, _}, _} | _]), do: false
   defp score_changed?(_, _), do: true
 
-  defp flush({on_rank, on_entry, cnt, c_i, c_pos, c_size, buf}) do
-    rank_stats = on_rank.({cnt, c_i, c_pos, c_size})
+  defp flush({indexer, cnt, c_i, c_pos, c_size, buf}) do
+    rank_stats = indexer.on_rank.({cnt, c_i, c_pos, c_size})
 
     Stream.map(buf, fn
       {key = {_, _, id}, i} ->
-        {id, key, {on_entry.({i, id, key, rank_stats}), rank_stats}}
+        {id, key, {indexer.on_entry.({i, id, key, rank_stats}), rank_stats}}
 
       {key = {_, id}, i} ->
-        {id, key, {on_entry.({i, id, key, rank_stats}), rank_stats}}
+        {id, key, {indexer.on_entry.({i, id, key, rank_stats}), rank_stats}}
     end)
   end
 end
