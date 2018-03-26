@@ -7,6 +7,7 @@ defmodule CxLeaderboard.Leaderboard do
     - Create any number of leaderboards.
     - Store scores and payloads.
     - Calculate ranks, percentiles, and other stats.
+    - Use custom ranking, percentile, and other stat functions.
     - Provide a sorted stream of all records.
     - Support custom tie-breakers for records of the same rank.
     - Provide a range of records around a specific id (contextual leaderboard).
@@ -27,11 +28,11 @@ defmodule CxLeaderboard.Leaderboard do
     * `{{score, id}, payload}`
     * `{{score, tiebreaker, id}, payload}`
 
-  A `score` can be any term — elixir will use it for sorting and ranking.
+  A `score` can be any term — it will be used for sorting and ranking.
 
-  A `tiebreaker` comes in handy when you know that you will have multiple
-  records of the same rank, and you'd like to use additional criteria to sort
-  them in the leaderboard.
+  A `tiebreaker` (also any term) comes in handy when you know that you will have
+  multiple records of the same rank, and you'd like to use additional criteria
+  to sort them in the leaderboard.
 
   An `id` is any term that uniquely identifies a record, and that you will be
   using to `get` them. Id is always the last tiebreaker.
@@ -47,11 +48,11 @@ defmodule CxLeaderboard.Leaderboard do
 
       # without tiebreaker
       {{score, id}, payload, {index,       {rank, percentile}}}
-      #\___key___/ \payload/  \entry stats/\___rank stats___/
+      #\\___key___/ \\payload/ \\entry stats/ \\___rank stats___/
 
       # with tiebreaker
       {{score, tiebreaker, id}, payload, {index,       {rank, percentile}}}
-      # \________key_________/ \payload/  \entry stats/\___rank stats___/
+      #\\_________key_________/ \\payload/ \\entry stats/ \\___rank stats___/
 
   ## Stats
 
