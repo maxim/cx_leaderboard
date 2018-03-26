@@ -8,22 +8,19 @@ alias CxLeaderboard.Leaderboard
 board =
   Leaderboard.create!(name: :global)
   |> Leaderboard.populate!([
-    {-20, :id1}, # Entries are:
-    {-30, :id2}  # {{score, tiebreak (optional), id}, payload (optional)}
-    # If you don't need tiebreak or payload, then this format is fine.
-    # Id is used as the payload if none given.
-    # Note: here we use negative score numbers because we want descending sort.
+    {-20, :id1},
+    {-30, :id2}
   ])
 
 records =
   board
-  |> Leaderboard.top(board)
+  |> Leaderboard.top()
   |> Enum.take(2)
 
 # Returned records (explained):
-# {{score, id}, payload, {index, rank, percentile, # lower scores, frequency}}
-# {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}} 
-# {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}}
+#   {{score, id}, payload, {index, rank, percentile}}
+# [ {{-30,  :id2}, :id2,   {0,     {1,    99.0}}},
+#   {{-20,  :id1}, :id1,   {1,     {2,    50.0}}} ]
 ```
 
 ## Features
@@ -33,14 +30,11 @@ records =
 * Stream API access to records from top and bottom
 * O(1) querying of any record by id
 * Adding, updating, removing, upserting of individual entries
-* Fetching a range of records around a given id (for context)
-* Pluggable data stores: ets for big boards, term for mini boards
-* Atomic rebuilds in O(2n log n) time
+* Fetching a range of records around a given id (contextual leaderboard)
+* Pluggable data stores: `EtsStore` for big boards, `TermStore` for dynamic mini boards
+* Support for custom ranking and other stat functions
+* Atomic full repopulation in O(2n log n) time
 * Multi-node support
-
-## Planned features
-
-* Pluggable indexers
 
 ## Installation
 
