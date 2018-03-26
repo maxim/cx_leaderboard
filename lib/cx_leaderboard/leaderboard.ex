@@ -258,7 +258,7 @@ defmodule CxLeaderboard.Leaderboard do
       iex> {:ok, board} = Leaderboard.populate(board, [{-2, :id1}, {-3, :id2}])
       iex> {:ok, board} = Leaderboard.update(board, {-5, :id1})
       iex> Leaderboard.get(board, :id1)
-      {{-5, :id1}, :id1, {0, 1, 75.0, 1, 1}}
+      {{-5, :id1}, :id1, {0, {1, 99.0}}}
       iex> Leaderboard.update(board, {-2, :missing_id})
       {:error, :entry_not_found}
   """
@@ -296,10 +296,10 @@ defmodule CxLeaderboard.Leaderboard do
       iex> {:ok, board} = Leaderboard.create(name: :foo)
       iex> {:ok, board} = Leaderboard.add_or_update(board, {1, :id1})
       iex> Leaderboard.get(board, :id1)
-      {{1, :id1}, :id1, {0, 1, 50.0, 0, 1}}
+      {{1, :id1}, :id1, {0, {1, 99.0}}}
       iex> {:ok, board} = Leaderboard.add_or_update(board, {2, :id1})
       iex> Leaderboard.get(board, :id1)
-      {{2, :id1}, :id1, {0, 1, 50.0, 0, 1}}
+      {{2, :id1}, :id1, {0, {1, 99.0}}}
   """
   @spec add_or_update(Leaderboard.t(), Entry.t()) ::
           {:ok, Leaderboard.t()} | {:error, term}
@@ -365,7 +365,7 @@ defmodule CxLeaderboard.Leaderboard do
       iex> {:ok, board} = Leaderboard.create(name: :foo)
       iex> {:ok, board} = Leaderboard.populate(board, [{-2, :id1}, {-3, :id2}])
       iex> Leaderboard.top(board) |> Enum.take(1)
-      [{{-3, :id2}, :id2, {0, 1, 75.0, 1, 1}}]
+      [{{-3, :id2}, :id2, {0, {1, 99.0}}}]
   """
   @spec top(Leaderboard.t()) :: Enumerable.t()
   def top(%__MODULE__{state: state, store: store}) do
@@ -380,7 +380,7 @@ defmodule CxLeaderboard.Leaderboard do
       iex> {:ok, board} = Leaderboard.create(name: :foo)
       iex> {:ok, board} = Leaderboard.populate(board, [{-2, :id1}, {-3, :id2}])
       iex> Leaderboard.bottom(board) |> Enum.take(1)
-      [{{-2, :id1}, :id1, {1, 2, 25.0, 0, 1}}]
+      [{{-2, :id1}, :id1, {1, {2, 50.0}}}]
   """
   @spec bottom(Leaderboard.t()) :: Enumerable.t()
   def bottom(%__MODULE__{state: state, store: store}) do
@@ -412,7 +412,7 @@ defmodule CxLeaderboard.Leaderboard do
       iex> {:ok, board} = Leaderboard.create(name: :foo)
       iex> {:ok, board} = Leaderboard.populate(board, [{-2, :id1}, {-3, :id2}])
       iex> Leaderboard.get(board, :id1)
-      {{-2, :id1}, :id1, {1, 2, 25.0, 0, 1}}
+      {{-2, :id1}, :id1, {1, {2, 50.0}}}
       iex> Leaderboard.get(board, :missing_id)
       nil
   """
@@ -438,13 +438,13 @@ defmodule CxLeaderboard.Leaderboard do
       ...> ])
       iex> Leaderboard.get(board, :id3, -1..0)
       [
-        {{-3, :id2}, :id2, {1, 2, 62.5, 2, 1}},
-        {{-2, :id3}, :id3, {2, 3, 37.5, 1, 1}}
+        {{-3, :id2}, :id2, {1, {2, 74.5}}},
+        {{-2, :id3}, :id3, {2, {3, 50.0}}}
       ]
       iex> Leaderboard.get(board, :id3, 0..-1)
       [
-        {{-2, :id3}, :id3, {2, 3, 37.5, 1, 1}},
-        {{-3, :id2}, :id2, {1, 2, 62.5, 2, 1}}
+        {{-2, :id3}, :id3, {2, {3, 50.0}}},
+        {{-3, :id2}, :id2, {1, {2, 74.5}}}
       ]
   """
   @spec get(Leaderboard.t(), Entry.id(), Range.t()) :: [Record.t()]

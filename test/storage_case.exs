@@ -26,8 +26,8 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(2)
 
         assert [
-                 {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}},
-                 {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}}
+                 {{-30, :id2}, :id2, {0, {1, 99.0}}},
+                 {{-20, :id1}, :id1, {1, {2, 50.0}}}
                ] == top
       end
 
@@ -42,8 +42,8 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(2)
 
         assert [
-                 {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}},
-                 {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}}
+                 {{-20, :id1}, :id1, {1, {2, 50.0}}},
+                 {{-30, :id2}, :id2, {0, {1, 99.0}}}
                ] == bottom
       end
 
@@ -58,8 +58,8 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(2)
 
         assert [
-                 {{-30, :id2}, %{bar: "bar"}, {0, 1, 75.0, 1, 1}},
-                 {{-20, :id1}, %{foo: "foo"}, {1, 2, 25.0, 0, 1}}
+                 {{-30, :id2}, %{bar: "bar"}, {0, {1, 99.0}}},
+                 {{-20, :id1}, %{foo: "foo"}, {1, {2, 50.0}}}
                ] == top
       end
 
@@ -76,10 +76,10 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(4)
 
         assert [
-                 {{-30, 3, :id3}, :id3, {0, 1, 75.0, 2, 2}},
-                 {{-30, 4, :id4}, :id4, {1, 1, 75.0, 2, 2}},
-                 {{-20, 1, :id2}, :id2, {2, 3, 25.0, 0, 2}},
-                 {{-20, 2, :id1}, :id1, {3, 3, 25.0, 0, 2}}
+                 {{-30, 3, :id3}, :id3, {0, {1, 99.0}}},
+                 {{-30, 4, :id4}, :id4, {1, {1, 99.0}}},
+                 {{-20, 1, :id2}, :id2, {2, {3, 50.0}}},
+                 {{-20, 2, :id1}, :id1, {3, {3, 50.0}}}
                ] == top
       end
 
@@ -93,10 +93,10 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(4)
 
         assert [
-                 {{-40, :id3}, :id3, {0, 1, 75.0, 2, 2}},
-                 {{-40, :id4}, :id4, {1, 1, 75.0, 2, 2}},
-                 {{-30, :id2}, :id2, {2, 3, 37.5, 1, 1}},
-                 {{-20, :id1}, :id1, {3, 4, 12.5, 0, 1}}
+                 {{-40, :id3}, :id3, {0, {1, 99.0}}},
+                 {{-40, :id4}, :id4, {1, {1, 99.0}}},
+                 {{-30, :id2}, :id2, {2, {3, 50.0}}},
+                 {{-20, :id1}, :id1, {3, {4, 25.5}}}
                ] == top
       end
 
@@ -115,7 +115,7 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(1)
 
         assert [
-                 {{-20, :id1}, :id1, {0, 1, 50.0, 0, 1}}
+                 {{-20, :id1}, :id1, {0, {1, 99.0}}}
                ] == top
       end
 
@@ -133,8 +133,8 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(2)
 
         assert [
-                 {{-30, :id2}, :id2, {0, 1, 75.0, 1, 1}},
-                 {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}}
+                 {{-30, :id2}, :id2, {0, {1, 99.0}}},
+                 {{-20, :id1}, :id1, {1, {2, 50.0}}}
                ] == top
 
         top =
@@ -144,8 +144,8 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(3)
 
         assert [
-                 {{-20, :id1}, :id1, {0, 1, 75.0, 1, 1}},
-                 {{-10, :id2}, :id2, {1, 2, 25.0, 0, 1}}
+                 {{-20, :id1}, :id1, {0, {1, 99.0}}},
+                 {{-10, :id2}, :id2, {1, {2, 50.0}}}
                ] == top
       end
 
@@ -163,7 +163,7 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(2)
 
         assert [
-                 {{-30, :id2}, :id2, {0, 1, 50.0, 0, 1}}
+                 {{-30, :id2}, :id2, {0, {1, 99.0}}}
                ] == top
       end
 
@@ -180,7 +180,7 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(1)
 
         assert [
-                 {{-10, :id1}, :id1, {0, 1, 50.0, 0, 1}}
+                 {{-10, :id1}, :id1, {0, {1, 99.0}}}
                ] == top
       end
 
@@ -193,7 +193,7 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(2)
 
         assert [
-                 {{-20, :id1}, :id1, {0, 1, 50.0, 0, 1}}
+                 {{-20, :id1}, :id1, {0, {1, 99.0}}}
                ] == top
       end
 
@@ -213,7 +213,7 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(2)
 
         assert [
-                 {{-30, :tiebreak, :id2}, :id2, {0, 1, 50.0, 0, 1}}
+                 {{-30, :tiebreak, :id2}, :id2, {0, {1, 99.0}}}
                ] == top
       end
 
@@ -228,8 +228,8 @@ defmodule CxLeaderboard.StorageCase do
           |> Enum.take(2)
 
         assert [
-                 {{"a", :id1}, :id1, {0, 1, 75.0, 1, 1}},
-                 {{"b", :id2}, :id2, {1, 2, 25.0, 0, 1}}
+                 {{"a", :id1}, :id1, {0, {1, 99.0}}},
+                 {{"b", :id2}, :id2, {1, {2, 50.0}}}
                ] == top
       end
 
@@ -238,7 +238,7 @@ defmodule CxLeaderboard.StorageCase do
           board
           |> Leaderboard.populate!([{-20, :id1}, {-30, :id2}])
 
-        assert {{-20, :id1}, :id1, {1, 2, 25.0, 0, 1}} ==
+        assert {{-20, :id1}, :id1, {1, {2, 50.0}}} ==
                  Leaderboard.get(board, :id1)
       end
 
@@ -254,8 +254,8 @@ defmodule CxLeaderboard.StorageCase do
           |> Leaderboard.get(:id2, 0..1)
 
         assert [
-                 {{-30, :id2}, :id2, {1, 2, 62.5, 2, 1}},
-                 {{-20, :id3}, :id3, {2, 3, 37.5, 1, 1}}
+                 {{-30, :id2}, :id2, {1, {2, 74.5}}},
+                 {{-20, :id3}, :id3, {2, {3, 50.0}}}
                ] == records
       end
 
@@ -271,8 +271,8 @@ defmodule CxLeaderboard.StorageCase do
           |> Leaderboard.get(:id2, -1..0)
 
         assert [
-                 {{-40, :id1}, :id1, {0, 1, 87.5, 3, 1}},
-                 {{-30, :id2}, :id2, {1, 2, 62.5, 2, 1}}
+                 {{-40, :id1}, :id1, {0, {1, 99.0}}},
+                 {{-30, :id2}, :id2, {1, {2, 74.5}}}
                ] == records
       end
 
@@ -288,9 +288,9 @@ defmodule CxLeaderboard.StorageCase do
           |> Leaderboard.get(:id2, -2..1)
 
         assert [
-                 {{-40, :id1}, :id1, {0, 1, 87.5, 3, 1}},
-                 {{-30, :id2}, :id2, {1, 2, 62.5, 2, 1}},
-                 {{-20, :id3}, :id3, {2, 3, 37.5, 1, 1}}
+                 {{-40, :id1}, :id1, {0, {1, 99.0}}},
+                 {{-30, :id2}, :id2, {1, {2, 74.5}}},
+                 {{-20, :id3}, :id3, {2, {3, 50.0}}}
                ] == records
       end
 
@@ -306,10 +306,10 @@ defmodule CxLeaderboard.StorageCase do
           |> Leaderboard.get(:id2, 2..-1)
 
         assert [
-                 {{-10, :id4}, :id4, {3, 4, 12.5, 0, 1}},
-                 {{-20, :id3}, :id3, {2, 3, 37.5, 1, 1}},
-                 {{-30, :id2}, :id2, {1, 2, 62.5, 2, 1}},
-                 {{-40, :id1}, :id1, {0, 1, 87.5, 3, 1}}
+                 {{-10, :id4}, :id4, {3, {4, 25.5}}},
+                 {{-20, :id3}, :id3, {2, {3, 50.0}}},
+                 {{-30, :id2}, :id2, {1, {2, 74.5}}},
+                 {{-40, :id1}, :id1, {0, {1, 99.0}}}
                ] == records
       end
 
