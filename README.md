@@ -71,12 +71,12 @@ Script: [benchmark/populate.exs](benchmark/populate.exs)
 
 ```
 Name           ips        average  deviation         median         99th %
-ets           0.21         4.82 s     ±3.47%         4.82 s         4.98 s
-term         0.187         5.36 s     ±0.00%         5.36 s         5.36 s
+ets           0.21         4.76 s     ±0.95%         4.76 s         4.81 s
+term         0.169         5.91 s     ±0.00%         5.91 s         5.91 s
 
 Comparison:
 ets           0.21
-term         0.187 - 1.11x slower
+term         0.169 - 1.24x slower
 ```
 
 Summary:
@@ -92,12 +92,12 @@ Script: [benchmark/add_entry.exs](benchmark/add_entry.exs)
 
 ```
 Name           ips        average  deviation         median         99th %
-ets       148.85 K      0.00001 s   ±113.79%      0.00001 s      0.00002 s
-term     0.00031 K         3.22 s     ±4.34%         3.22 s         3.36 s
+ets       148.95 K      0.00001 s    ±88.34%      0.00001 s      0.00002 s
+term     0.00034 K         2.92 s     ±0.56%         2.92 s         2.94 s
 
 Comparison:
-ets       148.85 K
-term     0.00031 K - 479249.69x slower
+ets       148.95 K
+term     0.00034 K - 435227.97x slower
 ```
 
 As you can see, you should not create a term leaderboard with a million entries, and especially not add more to it, it's designed for small leaderboards.
@@ -108,12 +108,12 @@ Script: [benchmark/range.exs](benchmark/range.exs)
 
 ```
 Name           ips        average  deviation         median         99th %
-ets        16.37 K      0.0611 ms    ±20.67%      0.0580 ms       0.111 ms
-term     0.00596 K      167.91 ms     ±3.62%      167.24 ms      181.08 ms
+ets        17.84 K      0.0560 ms    ±20.66%      0.0530 ms       0.101 ms
+term     0.00290 K      345.13 ms     ±3.83%      345.04 ms      374.28 ms
 
 Comparison:
-ets        16.37 K
-term     0.00596 K - 2748.72x slower
+ets        17.84 K
+term     0.00290 K - 6158.09x slower
 ```
 
 Another example of how the term leaderboard is not intended for big number of entries.
