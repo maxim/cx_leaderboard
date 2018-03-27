@@ -1,27 +1,35 @@
 # CxLeaderboard
 
-A featureful, efficient leaderboard based on ets store. Supports records of any shape.
+A featureful, fast leaderboard based on ets store. Can carry payloads, calculate custom stats, provide nearby entries around any entry, and do many other fun things.
 
 ```elixir
 alias CxLeaderboard.Leaderboard
 
 board =
-  Leaderboard.create!(name: :global)
+  Leaderboard.create!(name: :global_lb)
   |> Leaderboard.populate!([
-    {-20, :id1},
-    {-30, :id2}
+    {{-23, :id1}, :user1},
+    {{-65, :id2}, :user2},
+    {{-24, :id3}, :user3},
+    {{-23, :id4}, :user4},
+    {{-34, :id5}, :user5}
   ])
 
 records =
   board
   |> Leaderboard.top()
-  |> Enum.take(2)
+  |> Enum.to_list()
 
 # Returned records (explained):
-#   {{score, id}, payload, {index, rank, percentile}}
-# [ {{-30,  :id2}, :id2,   {0,     {1,    99.0}}},
-#   {{-20,  :id1}, :id1,   {1,     {2,    50.0}}} ]
+#   {{score, id}, payload, {index, {rank, percentile}}}
+# [ {{-65, :id2}, :user2,  {0,     {1,    99.0}}},
+#   {{-65, :id3}, :user3,  {1,     {1,    99.0}}},
+#   {{-34, :id5}, :user5,  {2,     {3,    59.8}}},
+#   {{-23, :id1}, :user1,  {3,     {4,    40.2}}},
+#   {{-23, :id4}, :user4,  {4,     {4,    40.2}}} ]
 ```
+
+It's advised to give Leaderboard.populate/2 function a stream rather than a list of data. For example: it could be a stream that takes entries from paginated database queries.
 
 ## Features
 
@@ -47,6 +55,112 @@ def deps do
   ]
 end
 ```
+
+## Fetching ranges
+
+If you want to get a record and its context (nearby records), you can use a range.
+
+```elixir
+Leaderboard.get(board, :id3, -1..1)
+# [
+#   {{-34, :id5}, :user5, {1, {2, 79.4}}},
+#   {{-24, :id3}, :user3, {2, {3, 59.8}}},
+#   {{-23, :id1}, :user1, {3, {4, 40.2}}}
+# ]
+```
+
+## Different ranking flavors
+
+To use different ranking you can just create your own indexer. Here's an example of the above leaderboard only in this case we want sequential ranks.
+
+```elixir
+alias CxLeaderboard.{Leaderboard, Indexer}
+
+my_indexer = %Indexer{on_rank:
+  &CxLeaderboard.Indexer.Stats.sequential_rank_1_99_less_or_equal_percentile/1}
+
+board =
+  Leaderboard.create!(name: :global_lb, indexer: my_indexer)
+  |> Leaderboard.populate!([
+    {{-23, :id1}, :user1},
+    {{-65, :id2}, :user2},
+    {{-65, :id3}, :user3},
+    {{-23, :id4}, :user4},
+    {{-34, :id5}, :user5}
+  ])
+
+records =
+  board
+  |> Leaderboard.top()
+  |> Enum.to_list()
+
+# Returned records (explained):
+# [ {{-65, :id2}, :user2, {0, {1, 99.0}}},
+#   {{-65, :id3}, :user3, {1, {1, 99.0}}},
+#   {{-34, :id5}, :user5, {2, {2, 59.8}}},
+#   {{-23, :id1}, :user1, {3, {3, 40.2}}},
+#   {{-23, :id4}, :user4, {4, {3, 40.2}}} ]
+```
+
+See docs for `CxLeaderboard.Indexer.Stats` for various functions you can plug into the indexer, or write your own.
+
+## Mini-leaderboards
+
+Sometimes all you need is to render a quick one-off leaderboard with just a few entries in it. For this you don't have to run a persistent ets, instead you can use `TermStore`.
+
+```elixir
+miniboard =
+  Leaderboard.create!(store: CxLeaderboard.TermStore)
+  |> Leaderboard.populate!(
+    [
+      {23, 1},
+      {65, 2},
+      {24, 3},
+      {23, 4},
+      {34, 5}
+    ]
+  )
+
+miniboard
+|> Leaderboard.top()
+|> Enum.take(3)
+# [
+#   {{23, 1}, 1, {0, {1, 99.0}}},
+#   {{23, 4}, 4, {1, {1, 99.0}}},
+#   {{24, 3}, 3, {2, {3, 59.8}}}
+# ]
+```
+
+This would produce a complete full-featured leaderboard that's entirely stored in the `miniboard` variable. Here's what the struct actually looks like:
+
+```elixir
+%CxLeaderboard.Leaderboard{
+  indexer: %CxLeaderboard.Indexer{
+    on_entry: &CxLeaderboard.Indexer.Stats.global_index/1,
+    on_rank: &CxLeaderboard.Indexer.Stats.offset_rank_1_99_less_or_equal_percentile/1
+  },
+  state: %{
+    count: 5,
+    index: %{
+      id1: {:id1, {-23, :id1}, {3, {4, 40.2}}},
+      id2: {:id2, {-65, :id2}, {0, {1, 99.0}}},
+      id3: {:id3, {-24, :id3}, {2, {3, 59.8}}},
+      id4: {:id4, {-23, :id4}, {4, {4, 40.2}}},
+      id5: {:id5, {-34, :id5}, {1, {2, 79.4}}}
+    },
+    table: [
+      {{-65, :id2}, :user2},
+      {{-34, :id5}, :user5},
+      {{-24, :id3}, :user3},
+      {{-23, :id1}, :user1},
+      {{-23, :id4}, :user4}
+    ]
+  },
+  store: CxLeaderboard.TermStore
+}
+```
+
+From this you can gather some inner workings of the leaderboard. It's based on 2 tables, one keyed by id, and the other keyed and sorted by the score. The indexer defines the functions used to build the index table.
 
 ## Benchmark
 
