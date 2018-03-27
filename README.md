@@ -195,8 +195,8 @@ term         0.169 - 1.24x slower
 
 Summary:
 
-  - It takes 5.14s to populate ets leaderboard with 1 million random scores.
-  - It takes 6.41s to populate term leaderboard with 1 million random scores.
+  - It takes ~4.76s to populate ets leaderboard with 1 million random scores.
+  - It takes ~5.91s to populate term leaderboard with 1 million random scores (but you shouldn't).
 
 The leaderboard is fully sorted and indexed at the end.
 
