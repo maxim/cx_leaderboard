@@ -43,6 +43,7 @@ It's advised to give Leaderboard.populate/2 function a stream rather than a list
 * Support for custom ranking and other stat functions
 * Atomic full repopulation in O(2n log n) time
 * Multi-node support
+* Support for custom storage engines (`CxLeaderboard.Storage` behaviour)
 
 ## Installation
 
@@ -77,7 +78,7 @@ To use different ranking you can just create your own indexer. Here's an example
 alias CxLeaderboard.{Leaderboard, Indexer}
 
 my_indexer = Indexer.new(on_rank:
-  &CxLeaderboard.Indexer.Stats.sequential_rank_1_99_less_or_equal_percentile/1)
+  &Indexer.Stats.sequential_rank_1_99_less_or_equal_percentile/1)
 
 board =
   Leaderboard.create!(name: :global_lb, indexer: my_indexer)
