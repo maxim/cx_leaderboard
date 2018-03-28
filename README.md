@@ -57,6 +57,38 @@ def deps do
 end
 ```
 
+## Global Leaderboards
+
+If you want to have a global leaderboard running alongside your app (e.g. Phoenix app), all you need to do is declare a worker as follows:
+
+```elixir
+defmodule Foo.Application do
+  use Application
+
+  def start(_type, _args) do
+    import Supervisor.Spec
+
+    children = [
+      worker(CxLeaderboard.Leaderboard, [:global]) # <- give it any name
+    ]
+
+    opts = [strategy: :one_for_one, name: Foo.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+end
+```
+
+Then you can interact with it anywhere in your app like this:
+
+```elixir
+alias CxLeaderboard.Leaderboard
+
+global_lb = Leaderboard.client_for(:global)
+global_lb
+|> Leaderboard.top()
+|> Enum.take(10)
+```
+
 ## Fetching ranges
 
 If you want to get a record and its context (nearby records), you can use a range.
