@@ -1,4 +1,10 @@
 defmodule CxLeaderboard.TermStore do
+  @moduledoc """
+  Use this storage engine to make small size one-off leaderboards that are
+  stored entirely in a variable. Useful for leaderboards scoped to small groups
+  of participants.
+  """
+
   @behaviour CxLeaderboard.Storage
 
   alias CxLeaderboard.{Indexer, Entry}

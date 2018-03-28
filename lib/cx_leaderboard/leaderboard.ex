@@ -4,19 +4,37 @@ defmodule CxLeaderboard.Leaderboard do
   Leaderboard is a lightweight database designed to optimize storing and sorting
   data based on ranked scores. It has the following abilities:
 
-    - Create any number of leaderboards.
-    - Store scores and payloads.
-    - Calculate ranks, percentiles, and other stats.
-    - Use custom ranking, percentile, and other stat functions.
-    - Provide a sorted stream of all records.
-    - Support custom tie-breakers for records of the same rank.
-    - Provide a range of records around a specific id (contextual leaderboard).
-    - Add/remove/update/upsert individual records in an existing leaderboard.
-    - Re-populate the leaderboard with asynchrony and atomicity.
-    - Build mini-leaderboards contained in simple elixir structs.
+    - Create any number of leaderboards
+    - Store scores and payloads
+    - Calculate ranks, percentiles, and other stats
+    - Use custom ranking, percentile, and other stat functions
+    - Provide a sorted stream of all records
+    - Support custom tie-breakers for records of the same rank
+    - Provide a range of records around a specific id (contextual leaderboard)
+    - Add/remove/update/upsert individual records in an existing leaderboard
+    - Re-populate the leaderboard with asynchrony and atomicity
+    - Build mini-leaderboards contained in simple elixir structs
+    - Add your own custom storage engine (`CxLeaderboard.Storage` behaviour)
 
-  In order to fill a leaderboard you need to have an enumerable of all your
-  entries.
+  Here's a quick example. We use the negative score values trick to make higher
+  score sort to the top naturally.
+
+      alias CxLeaderboard.Leaderboard
+
+      my_lb = Leaderboard.create!(name: :main)
+      my_lb =
+        Leaderboard.populate!(my_lb, [
+          {{-50, :id1}, :alice},
+          {{-40, :id2}, :bob}
+        ])
+
+      my_lb
+      |> Leaderboard.top()
+      |> Enum.take(2)
+      # [
+      #   {{-50, :id1}, :alice, {0, {1, 99.0}}},
+      #   {{-40, :id2}, :bob, {1, {2, 50.0}}}
+      # ]
 
   ## Entry
 
@@ -185,8 +203,8 @@ defmodule CxLeaderboard.Leaderboard do
   end
 
   @doc """
-  Populates a leaderboard with entries asynchronously. Only works with EtsStore.
-  Invalid entries are silently skipped.
+  Populates a leaderboard with entries asynchronously. Only works with
+  `CxLeaderboard.EtsStore`. Invalid entries are silently skipped.
 
   See Entry section of the module doc for information about entries.
 
@@ -482,11 +500,12 @@ defmodule CxLeaderboard.Leaderboard do
   end
 
   @doc """
-  If your chosen storage engine supports server/client operation (`EtsStore`
-  does), then you could set `Leaderboard` as a worker in your application's
-  children list. For each leaderboard you would just add a worker, passing it a
-  name. Then in your applicaiton you can use `client_for/2` to get the reference
-  to it that you can use to call all the functions in this module.
+  If your chosen storage engine supports server/client operation
+  (`CxLeaderboard.EtsStore` does), then you could set `Leaderboard` as a worker
+  in your application's children list. For each leaderboard you would just add a
+  worker, passing it a name. Then in your applicaiton you can use `client_for/2`
+  to get the reference to it that you can use to call all the functions in this
+  module.
 
   ## Examples
 

@@ -96,14 +96,31 @@ defmodule CxLeaderboard.Indexer do
 
   @type on_entry :: ({non_neg_integer, term, Entry.key(), term} -> term)
 
+  @doc """
+  Create a custom indexer by supplying 2 functions: `on_rank` and `on_entry`.
+  See `CxLeaderboard.Indexer.Stats` for available functions, or implement custom
+  ones.
+  """
+  @spec new(keyword()) :: t()
+  def new(kwargs) do
+    on_rank = Keyword.get(kwargs, :on_rank, nil)
+    on_entry = Keyword.get(kwargs, :on_entry, nil)
+    %__MODULE__{on_rank: on_rank, on_entry: on_entry}
+  end
+
+  @doc """
+  Same as `index/3` but counts the elements for you so that there is no need to
+  supply that number. This is inefficient if you already know the total count.
+  """
   def index(keys) do
     index(keys, Enum.count(keys))
   end
 
-  def index(keys, cnt) do
-    index(keys, cnt, %__MODULE__{})
-  end
-
+  @doc """
+  Build leaderboard index from an enumerable containing `Entry.key()`-type
+  elements. Supply the total count for efficiency.
+  """
+  def index(keys, cnt, indexer \\ %__MODULE__{})
   def index(_, 0, _), do: []
 
   def index(keys, cnt, indexer) do

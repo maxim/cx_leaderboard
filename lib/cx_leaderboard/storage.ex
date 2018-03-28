@@ -1,4 +1,8 @@
 defmodule CxLeaderboard.Storage do
+  @moduledoc """
+  Use this behaviour to implement your own leaderboard storage engines.
+  """
+
   alias CxLeaderboard.{Leaderboard, Entry, Record, Indexer}
 
   @doc """

@@ -8,6 +8,7 @@ defmodule CxLeaderboard.MixProject do
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      source_url: "https://github.com/crossfield/cx_leaderboard",
       dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]],
       docs: [main: "CxLeaderboard.Leaderboard", extras: ["README.md"]]
     ]

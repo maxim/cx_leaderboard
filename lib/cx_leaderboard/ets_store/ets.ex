@@ -1,4 +1,6 @@
 defmodule CxLeaderboard.EtsStore.Ets do
+  @moduledoc false
+
   alias CxLeaderboard.{Indexer, Entry}
 
   @meta_table_settings [

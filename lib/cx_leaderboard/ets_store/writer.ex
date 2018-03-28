@@ -1,4 +1,6 @@
 defmodule CxLeaderboard.EtsStore.Writer do
+  @moduledoc false
+
   use GenServer
   alias CxLeaderboard.EtsStore.Ets
 
