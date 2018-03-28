@@ -57,9 +57,9 @@ defmodule CxLeaderboard.Leaderboard do
   ## Stats
 
   By default the stats you get are index, rank, and percentile. However, passing
-  a custom indexer into the `create/1` function allows you to calculate your own
-  stats. To learn more about indexer customization read the module docs of
-  `CxLeaderboard.Indexer`.
+  a custom indexer into the `create/1` or `client_for/2` functions allows you to
+  calculate your own stats. To learn more about indexer customization read the
+  module docs of `CxLeaderboard.Indexer`.
   """
 
   @enforce_keys [:state, :store, :indexer]
@@ -479,6 +479,63 @@ defmodule CxLeaderboard.Leaderboard do
   @spec get(Leaderboard.t(), Entry.id(), Range.t()) :: [Record.t()]
   def get(%__MODULE__{state: state, store: store}, entry_id, range) do
     store.get(state, entry_id, range)
+  end
+
+  @doc """
+  If your chosen storage engine supports server/client operation (`EtsStore`
+  does), then you could set `Leaderboard` as a worker in your application's
+  children list. For each leaderboard you would just add a worker, passing it a
+  name. Then in your applicaiton you can use `client_for/2` to get the reference
+  to it that you can use to call all the functions in this module.
+
+  ## Examples
+
+      defmodule Foo.Application do
+        use Application
+
+        def start(_type, _args) do
+          import Supervisor.Spec
+
+          children = [
+            worker(CxLeaderboard.Leaderboard, [:global])
+          ]
+
+          opts = [strategy: :one_for_one, name: Foo.Supervisor]
+          Supervisor.start_link(children, opts)
+        end
+      end
+
+      # Elsewhere in your application
+      alias CxLeaderboard.Leaderboard
+
+      global_lb = Leaderboard.client_for(:global)
+      global_lb
+      |> Leaderboard.top()
+      |> Enum.take(10)
+
+  Indexer is configured at the client level (it's passed to server with each
+  function), therefore if you want the leaderboard to use a custom indexer, all
+  you need to do is:
+
+      lb = Leaderboard.client_for(:global, indexer: my_custom_indexer)
+
+  See the Stats section of this module's doc to learn more about indexers.
+  """
+  @spec start_link(atom(), module()) :: GenServer.on_start()
+  def start_link(name, store \\ CxLeaderboard.EtsStore) do
+    store.start_link(name)
+  end
+
+  @doc """
+  When your leaderboard is started as a server elsewhere, use this function to
+  get a reference to be able to interact with it. See docs for `start_link/2`
+  for more information on client/server mode of operation.
+  """
+  @spec client_for(atom(), keyword()) :: Leaderboard.t()
+  def client_for(name, kwargs \\ []) do
+    store = Keyword.get(kwargs, :store, CxLeaderboard.EtsStore)
+    indexer = Keyword.get(kwargs, :indexer, %Indexer{})
+    %__MODULE__{state: name, store: store, indexer: indexer}
   end
 
   ## Private

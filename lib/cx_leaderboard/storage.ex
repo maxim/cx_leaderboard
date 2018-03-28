@@ -2,9 +2,15 @@ defmodule CxLeaderboard.Storage do
   alias CxLeaderboard.{Leaderboard, Entry, Record, Indexer}
 
   @doc """
-  Create a leaderboard in your storage identified with the provided atom.
+  Create a leaderboard in your storage (keyword arguments are determined by
+  storage needs). Return what needs to be persisted.
   """
   @callback create(keyword()) :: {:ok, Leaderboard.state()} | {:error, term}
+
+  @doc """
+  If supporting server/client mode: add a way to start the server.
+  """
+  @callback start_link(atom()) :: GenServer.on_start()
 
   @doc """
   Clear all the data in your leaderboard state.
@@ -90,5 +96,5 @@ defmodule CxLeaderboard.Storage do
   """
   @callback count(Leaderboard.state()) :: non_neg_integer
 
-  @optional_callbacks async_populate: 3
+  @optional_callbacks async_populate: 3, start_link: 1
 end

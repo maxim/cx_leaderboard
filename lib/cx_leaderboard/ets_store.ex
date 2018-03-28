@@ -45,6 +45,10 @@ defmodule CxLeaderboard.EtsStore do
     process_multi_call(name, {:add_or_update, entry, indexer})
   end
 
+  def start_link(name) do
+    GenServer.start_link(Writer, name, name: name)
+  end
+
   ## Readers
 
   defdelegate get(name, id), to: Ets
