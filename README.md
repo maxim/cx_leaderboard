@@ -76,8 +76,8 @@ To use different ranking you can just create your own indexer. Here's an example
 ```elixir
 alias CxLeaderboard.{Leaderboard, Indexer}
 
-my_indexer = %Indexer{on_rank:
-  &CxLeaderboard.Indexer.Stats.sequential_rank_1_99_less_or_equal_percentile/1}
+my_indexer = Indexer.new(on_rank:
+  &CxLeaderboard.Indexer.Stats.sequential_rank_1_99_less_or_equal_percentile/1)
 
 board =
   Leaderboard.create!(name: :global_lb, indexer: my_indexer)
