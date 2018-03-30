@@ -3,7 +3,7 @@ defmodule CxLeaderboard.MixProject do
 
   def project do
     [
-      description: "Featureful, fast leaderboards based on ets store.",
+      description: "Fast, customizable leaderboards database.",
       app: :cx_leaderboard,
       version: "0.1.0",
       elixir: "~> 1.6",
