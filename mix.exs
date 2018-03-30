@@ -27,7 +27,9 @@ defmodule CxLeaderboard.MixProject do
     %{
       licenses: ["Apache 2"],
       maintainers: ["Max Chernyak"],
-      links: %{"GitHub" => "https://github.com/crossfield/cx_leaderboard"}
+      links: %{"GitHub" => "https://github.com/crossfield/cx_leaderboard"},
+      files:
+        ~w(lib .formatter.exs CODE_OF_CONDUCT.md LICENSE mix.exs README.md)
     }
   end
 
