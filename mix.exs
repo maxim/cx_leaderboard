@@ -3,10 +3,12 @@ defmodule CxLeaderboard.MixProject do
 
   def project do
     [
+      description: "Featureful, fast leaderboards based on ets store.",
       app: :cx_leaderboard,
       version: "0.1.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
+      package: package(),
       deps: deps(),
       source_url: "https://github.com/crossfield/cx_leaderboard",
       dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]],
@@ -19,6 +21,14 @@ defmodule CxLeaderboard.MixProject do
     [
       extra_applications: [:logger]
     ]
+  end
+
+  defp package do
+    %{
+      licenses: ["Apache 2"],
+      maintainers: ["Max Chernyak"],
+      links: %{"GitHub" => "https://github.com/crossfield/cx_leaderboard"}
+    }
   end
 
   # Run "mix help deps" to learn about dependencies.
