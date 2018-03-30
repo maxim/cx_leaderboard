@@ -29,22 +29,21 @@ records =
 #   {{-23, :id4}, :user4,  {4,     {4,    40.2}}} ]
 ```
 
-It's advised to give Leaderboard.populate/2 function a stream rather than a list of data. For example: it could be a stream that takes entries from paginated database queries.
+It's advised to give `Leaderboard.populate/2` function a stream rather than a list of data. For example: it could be a stream that takes entries from paginated database queries.
 
 ## Features
 
-* Ranks and percentiles
+* Ranks, percentiles, any custom stats of your choice
 * Concurrent reads, sequential writes
-* Stream API access to records from top and bottom
+* Stream API access to records from the top and the bottom
 * O(1) querying of any record by id
 * Auto-populating data on leaderboard startup
-* Adding, updating, removing, upserting of individual entries
+* Adding, updating, removing, upserting of individual entries in live leaderboard
 * Fetching a range of records around a given id (contextual leaderboard)
 * Pluggable data stores: `EtsStore` for big boards, `TermStore` for dynamic mini boards
-* Support for custom ranking and other stat functions
 * Atomic full repopulation in O(2n log n) time
 * Multi-node support
-* Support for custom storage engines (`CxLeaderboard.Storage` behaviour)
+* Extensibility for storage engines (`CxLeaderboard.Storage` behaviour)
 
 ## Installation
 
@@ -60,7 +59,7 @@ end
 
 ## Global Leaderboards
 
-If you want to have a global leaderboard running alongside your app (e.g. Phoenix app), all you need to do is declare a worker as follows:
+If you want to have a global leaderboard starting at the same time as your application, and running alongside it, all you need to do is declare a worker as follows:
 
 ```elixir
 defmodule Foo.Application do
@@ -140,7 +139,9 @@ records =
 #   {{-23, :id4}, :user4, {4, {3, 40.2}}} ]
 ```
 
-See docs for `CxLeaderboard.Indexer.Stats` for various functions you can plug into the indexer, or write your own.
+Notice how the resulting ranks are not offset like 1,1,3,4,4 but are sequential like 1,1,2,3,3.
+
+See docs for `CxLeaderboard.Indexer.Stats` for various pre-packaged functions you can plug into the indexer, or write your own.
 
 ## Mini-leaderboards
 
@@ -169,36 +170,9 @@ miniboard
 # ]
 ```
 
-This would produce a complete full-featured leaderboard that's entirely stored in the `miniboard` variable. Here's what the struct actually looks like:
+This would produce a complete full-featured leaderboard that's entirely stored in the `miniboard` variable. All the same API functions work on it.
 
-```elixir
-%CxLeaderboard.Leaderboard{
-  indexer: %CxLeaderboard.Indexer{
-    on_entry: &CxLeaderboard.Indexer.Stats.global_index/1,
-    on_rank: &CxLeaderboard.Indexer.Stats.offset_rank_1_99_less_or_equal_percentile/1
-  },
-  state: %{
-    count: 5,
-    index: %{
-      id1: {:id1, {-23, :id1}, {3, {4, 40.2}}},
-      id2: {:id2, {-65, :id2}, {0, {1, 99.0}}},
-      id3: {:id3, {-24, :id3}, {2, {3, 59.8}}},
-      id4: {:id4, {-23, :id4}, {4, {4, 40.2}}},
-      id5: {:id5, {-34, :id5}, {1, {2, 79.4}}}
-    },
-    table: [
-      {{-65, :id2}, :user2},
-      {{-34, :id5}, :user5},
-      {{-24, :id3}, :user3},
-      {{-23, :id1}, :user1},
-      {{-23, :id4}, :user4}
-    ]
-  },
-  store: CxLeaderboard.TermStore
-}
-```
-
-From this you can gather some inner workings of the leaderboard. It's based on 2 tables, one keyed by id, and the other keyed and sorted by the score. The indexer defines the functions used to build the index table.
+Note: It is not recommended to use `TermStore` for big leaderboards (as evident from the benchmarks below). A typical use case for it would be to dynamically render a single-page leaderboard among a small group of users.
 
 ## Benchmark
 
@@ -252,7 +226,7 @@ ets       148.95 K
 term     0.00034 K - 435227.97x slower
 ```
 
-As you can see, you should not create a term leaderboard with a million entries, and especially not add more to it, it's designed for small leaderboards.
+As you can see, you should not create a `TermStore` leaderboard with a million entries.
 
 ### Getting a -10..10 range from 1mil leaderboard
 
@@ -268,7 +242,7 @@ ets        17.84 K
 term     0.00290 K - 6158.09x slower
 ```
 
-Another example of how the term leaderboard is not intended for big number of entries.
+Another example of how the `TermStore` is not intended for big number of entries.
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
