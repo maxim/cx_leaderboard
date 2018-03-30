@@ -12,9 +12,17 @@ defmodule CxLeaderboard.Storage do
   @callback create(keyword()) :: {:ok, Leaderboard.state()} | {:error, term}
 
   @doc """
-  If supporting server/client mode: add a way to start the server.
+  If supporting server/client mode: add a way to start the server and make sure
+  to store the leaderboard struct in the state, since it will be needed for
+  get_lb.
   """
-  @callback start_link(atom()) :: GenServer.on_start()
+  @callback start_link(Leaderboard.t()) :: GenServer.on_start()
+
+  @doc """
+  If supporting server/client mode: add a way to fetch the leaderboard stored in
+  your GenServer's state.
+  """
+  @callback get_lb(atom()) :: Leaderboard.t()
 
   @doc """
   Clear all the data in your leaderboard state.
@@ -100,5 +108,5 @@ defmodule CxLeaderboard.Storage do
   """
   @callback count(Leaderboard.state()) :: non_neg_integer
 
-  @optional_callbacks async_populate: 3, start_link: 1
+  @optional_callbacks async_populate: 3, start_link: 1, get_lb: 1
 end

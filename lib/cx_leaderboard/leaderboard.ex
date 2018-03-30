@@ -81,11 +81,16 @@ defmodule CxLeaderboard.Leaderboard do
   """
 
   @enforce_keys [:state, :store, :indexer]
-  defstruct [:state, :store, :indexer]
+  defstruct [:state, :store, :indexer, :data]
 
   alias CxLeaderboard.{Leaderboard, Entry, Record, Indexer}
 
-  @type t :: %__MODULE__{state: state(), store: module(), indexer: Indexer.t()}
+  @type t :: %__MODULE__{
+          state: state(),
+          store: module(),
+          indexer: Indexer.t(),
+          data: Enumerable.t() | nil
+        }
   @type state :: term
 
   ## Writer functions
@@ -114,18 +119,19 @@ defmodule CxLeaderboard.Leaderboard do
         %Leaderboard{
           state: :global,
           store: CxLeaderboard.EtsStore,
-          indexer: %CxLeaderboard.Indexer{}
+          indexer: %CxLeaderboard.Indexer{},
+          data: []
         }
       }
   """
   @spec create(keyword()) :: {:ok, Leaderboard.t()} | {:error, term}
   def create(kwargs \\ []) do
-    store = Keyword.get(kwargs, :store, CxLeaderboard.EtsStore)
-    indexer = Keyword.get(kwargs, :indexer, %Indexer{})
+    {store, indexer, data} = parse_options(kwargs)
 
     case store.create(kwargs) do
       {:ok, state} ->
-        {:ok, %__MODULE__{state: state, store: store, indexer: indexer}}
+        {:ok,
+         %__MODULE__{state: state, store: store, indexer: indexer, data: data}}
 
       error ->
         error
@@ -171,7 +177,8 @@ defmodule CxLeaderboard.Leaderboard do
   end
 
   @doc """
-  Populates a leaderboard with entries. Invalid entries are silently skipped.
+  Populates a leaderboard with entries replacing any existing content. Invalid
+  entries are silently skipped.
 
   See Entry section of the module doc for information about entries.
 
@@ -515,8 +522,14 @@ defmodule CxLeaderboard.Leaderboard do
         def start(_type, _args) do
           import Supervisor.Spec
 
+          # Make sure your data is available as a stream
+          data_stream = Foo.LeaderboardData.stream()
+
           children = [
-            worker(CxLeaderboard.Leaderboard, [:global])
+            worker(CxLeaderboard.Leaderboard, [
+              name: :global,
+              data: data_stream
+            ])
           ]
 
           opts = [strategy: :one_for_one, name: Foo.Supervisor]
@@ -540,9 +553,11 @@ defmodule CxLeaderboard.Leaderboard do
 
   See the Stats section of this module's doc to learn more about indexers.
   """
-  @spec start_link(atom(), module()) :: GenServer.on_start()
-  def start_link(name, store \\ CxLeaderboard.EtsStore) do
-    store.start_link(name)
+  @spec start_link(atom(), keyword()) :: GenServer.on_start()
+  def start_link(name, kwargs) do
+    {store, indexer, data} = parse_options(kwargs)
+    lb = %__MODULE__{state: name, store: store, indexer: indexer, data: data}
+    store.start_link(lb)
   end
 
   @doc """
@@ -550,14 +565,25 @@ defmodule CxLeaderboard.Leaderboard do
   get a reference to be able to interact with it. See docs for `start_link/2`
   for more information on client/server mode of operation.
   """
-  @spec client_for(atom(), keyword()) :: Leaderboard.t()
-  def client_for(name, kwargs \\ []) do
-    store = Keyword.get(kwargs, :store, CxLeaderboard.EtsStore)
-    indexer = Keyword.get(kwargs, :indexer, %Indexer{})
-    %__MODULE__{state: name, store: store, indexer: indexer}
+  @spec client_for(atom(), module()) :: Leaderboard.t()
+  def client_for(name, store \\ CxLeaderboard.EtsStore) do
+    store.get_lb(name)
   end
 
   ## Private
+
+  defp parse_options(kwargs) do
+    store = Keyword.get(kwargs, :store, CxLeaderboard.EtsStore)
+    indexer = Keyword.get(kwargs, :indexer, %Indexer{})
+
+    data =
+      case Keyword.get(kwargs, :data, []) do
+        [] -> []
+        data -> build_data_stream(data)
+      end
+
+    {store, indexer, data}
+  end
 
   defp update_state({:ok, state}, lb), do: {:ok, Map.put(lb, :state, state)}
   defp update_state(error, _), do: error

@@ -37,6 +37,7 @@ It's advised to give Leaderboard.populate/2 function a stream rather than a list
 * Concurrent reads, sequential writes
 * Stream API access to records from top and bottom
 * O(1) querying of any record by id
+* Auto-populating data on leaderboard startup
 * Adding, updating, removing, upserting of individual entries
 * Fetching a range of records around a given id (contextual leaderboard)
 * Pluggable data stores: `EtsStore` for big boards, `TermStore` for dynamic mini boards
@@ -69,7 +70,11 @@ defmodule Foo.Application do
     import Supervisor.Spec
 
     children = [
-      worker(CxLeaderboard.Leaderboard, [:global]) # <- give it any name
+      # This is where you provide a data enumerable (e.g. a stream of paginated 
+      # Postgres results) for leaderboard to auto-populate itself on startup.
+      # It's best if this is implemented as a Stream to avoid consuming more
+      # RAM than necessary.
+      worker(CxLeaderboard.Leaderboard, [:global, data: Foo.MyData.load()])
     ]
 
     opts = [strategy: :one_for_one, name: Foo.Supervisor]

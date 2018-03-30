@@ -61,8 +61,13 @@ defmodule CxLeaderboard.EtsStore do
   end
 
   @doc false
-  def start_link(name) do
-    GenServer.start_link(Writer, name, name: name)
+  def start_link(lb = %{state: name}) do
+    GenServer.start_link(Writer, {name, lb}, name: name)
+  end
+
+  @doc false
+  def get_lb(name) do
+    GenServer.call(name, :get_lb)
   end
 
   ## Readers
