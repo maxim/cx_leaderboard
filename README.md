@@ -1,5 +1,9 @@
 # CxLeaderboard
 
+[![Travis](https://img.shields.io/travis/crossfield/cx_leaderboard.svg?style=flat-square)](https://travis-ci.org/crossfield/cx_leaderboard)
+
+[![Hex.pm](https://img.shields.io/hexpm/v/cx_leaderboard.svg?style=flat-square)](https://hex.pm/packages/cx_leaderboard)
+
 A featureful, fast leaderboard based on ets store. Can carry payloads, calculate custom stats, provide nearby entries around any entry, and do many other fun things.
 
 ```elixir
