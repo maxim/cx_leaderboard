@@ -29,8 +29,6 @@ records =
 #   {{-23, :id4}, :user4,  {4,     {4,    40.2}}} ]
 ```
 
-It's advised to give `Leaderboard.populate/2` function a stream rather than a list of data. For example: it could be a stream that takes entries from paginated database queries.
-
 ## Features
 
 * Ranks, percentiles, any custom stats of your choice
@@ -244,6 +242,3 @@ term     0.00290 K - 6158.09x slower
 
 Another example of how the `TermStore` is not intended for big number of entries.
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/cx_leaderboard](https://hexdocs.pm/cx_leaderboard).
