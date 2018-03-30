@@ -6,7 +6,7 @@ defmodule CxLeaderboard.MixProject do
       description: "Fast, customizable leaderboards database.",
       app: :cx_leaderboard,
       version: "0.1.0",
-      elixir: "~> 1.4",
+      elixir: "~> 1.5",
       start_permanent: Mix.env() == :prod,
       package: package(),
       deps: deps(),
