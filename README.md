@@ -60,7 +60,8 @@ end
 
 ## Global Leaderboards
 
-If you want to have a global leaderboard starting at the same time as your application, and running alongside it, all you need to do is declare a worker as follows:
+If you want to have a global leaderboard starting at the same time as your application, and running alongside it, all you need to do is declare a 
+as follows:
 
 ```elixir
 defmodule Foo.Application do
@@ -74,7 +75,7 @@ defmodule Foo.Application do
       # Postgres results) for leaderboard to auto-populate itself on startup.
       # It's best if this is implemented as a Stream to avoid consuming more
       # RAM than necessary.
-      worker(CxLeaderboard.Leaderboard, [:global, data: Foo.MyData.load()])
+      worker(CxLeaderboard.Leaderboard, [:global, [data: Foo.MyData.load()]])
     ]
 
     opts = [strategy: :one_for_one, name: Foo.Supervisor]
