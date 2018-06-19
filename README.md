@@ -58,6 +58,10 @@ def deps do
 end
 ```
 
+## Documentation
+
+https://hexdocs.pm/cx_leaderboard/CxLeaderboard.Leaderboard.html
+
 ## Global Leaderboards
 
 If you want to have a global leaderboard starting at the same time as your application, and running alongside it, all you need to do is declare a 
